@@ -1,0 +1,32 @@
+#!/bin/bash -efu
+
+. "$TOOLSDIR"/sh-functions
+
+if ! $TOOLSDIR/podman image exists "$IMAGE_SYSIMAGE"; then
+	verbose "image creation: \`$IMAGE_SYSIMAGE'"
+
+	if [ -s "$SYSIMAGE_PACKAGES" ]; then
+		cp $verbose -f -- "$SYSIMAGE_PACKAGES" "$HOSTDIR/packages"
+
+		"$TOOLSDIR"/prepare-chrooted "download-packages"
+		"$TOOLSDIR"/podman container run --tty \
+			-v "$HOSTDIR":/.host:z \
+			"$IMAGE_BASEIMAGE"
+
+		"$TOOLSDIR"/prepare-chrooted "install-packages"
+		"$TOOLSDIR"/podman image build --squash \
+			-v "$HOSTDIR":/.host:z \
+			-t "$IMAGE_SYSIMAGE" \
+			-f - <<-EOF
+		FROM $IMAGE_SYSTEM
+		RUN /.host/run.sh
+		EOF
+	else
+		verbose "nothing to install. skipped."
+		"$TOOLSDIR"/podman image tag "$IMAGE_SYSTEM" "$IMAGE_SYSIMAGE"
+	fi
+else
+	verbose "image \`$IMAGE_SYSIMAGE' already exists"
+fi
+
+exit

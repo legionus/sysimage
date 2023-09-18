@@ -1,0 +1,17 @@
+#!/bin/bash
+
+PROG="${0##*/}"
+
+message() {
+	printf >&2 '%s: %s\n' "$PROG" "$*"
+}
+
+fatal() {
+	message "$*"
+	exit 1
+}
+
+verbose() {
+	[ -n "${verbose-}" ] || return 0
+	message "$*"
+}

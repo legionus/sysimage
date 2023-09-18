@@ -1,0 +1,46 @@
+#!/bin/bash -efu
+
+. "$TOOLSDIR"/sh-functions
+
+if ! "$TOOLSDIR"/podman image exists "$IMAGE_BOOTSTRAP"; then
+	verbose "image creation: \`$IMAGE_BOOTSTRAP'"
+
+	"$TOOLSDIR"/prepare-chrooted "build-bootstrap"
+	"$TOOLSDIR"/podman container run --tty \
+			-v "$HOSTDIR":/.host:z \
+			"$IMAGE_BASEIMAGE"
+	"$TOOLSDIR"/podman image import "$HOSTDIR/bootstrap.tar" "$IMAGE_BOOTSTRAP"
+
+	rm -f -- "$HOSTDIR/bootstrap.tar"
+else
+	verbose "image \`$IMAGE_BOOTSTRAP' already exists"
+fi
+
+if ! "$TOOLSDIR"/podman image exists "$IMAGE_SYSTEM"; then
+	verbose "image creation: \`$IMAGE_SYSTEM'"
+
+	if [ -n "$PKG_INIT_LIST2" ]; then
+		printf '%s\n' "$PKG_INIT_LIST2" >"$HOSTDIR/packages"
+
+		"$TOOLSDIR"/prepare-chrooted "download-packages"
+		"$TOOLSDIR"/podman container run --tty \
+			-v "$HOSTDIR":/.host:z \
+			"$IMAGE_BASEIMAGE"
+
+		"$TOOLSDIR"/prepare-chrooted "install-packages"
+		"$TOOLSDIR"/podman image build --squash --force-rm \
+			-v "$HOSTDIR":/.host:z \
+			-t "$IMAGE_SYSTEM" \
+			-f - <<-EOF
+		FROM $IMAGE_BOOTSTRAP
+		RUN /.host/run.sh
+		EOF
+	else
+		verbose "no extra packages for installation. skipped."
+		"$TOOLSDIR"/podman image tag "$IMAGE_BOOTSTRAP" "$IMAGE_SYSTEM"
+	fi
+else
+	verbose "image \`$IMAGE_SYSTEM' already exists"
+fi
+
+exit

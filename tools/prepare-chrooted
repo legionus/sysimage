@@ -1,0 +1,42 @@
+#!/bin/bash -efu
+
+name="$1"; shift
+
+quote_shell_variable()
+{
+	local __quote_shell_variable_var __quote_shell_variable_out
+	__quote_shell_variable_var="$1"; shift
+	__quote_shell_variable_out="$*"
+	if [ -z "${__quote_shell_variable_out##*[\"\$\`\\\\]*}" ]; then
+		__quote_shell_variable_out="$(printf %s "$__quote_shell_variable_out" |
+				sed -e 's/[\"$\`\\]/\\&/g')" ||
+			return 1
+	fi
+	eval "$__quote_shell_variable_var=\"\$__quote_shell_variable_out\""
+}
+
+[ -e "$HOSTDIR/sh-functions" ] ||
+	cp $verbose "$TOOLSDIR/sh-functions" "$HOSTDIR/sh-functions"
+
+exec >"$HOSTDIR/run.sh"
+chmod 755 "$HOSTDIR/run.sh"
+
+printf '%s\n' \
+	'#!/bin/bash' \
+	''
+for envname in ${CHROOTABLE_VARIABLES-}; do
+	eval "envval=\"\${$envname-}\""
+	quote_shell_variable envval "$envval"
+	printf 'export %s="%s"\n' "$envname" "$envval"
+done
+
+printf '%s\n' \
+	'' \
+	'export LC_ALL=C' \
+	'export LANG=C' \
+	'export LANGUAGE=C' \
+	'' \
+	'PROG="${0##*/}"' \
+	''
+
+cat "$VENDORDIR/$VENDOR/chrooted-$name"

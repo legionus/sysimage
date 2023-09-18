@@ -1,0 +1,26 @@
+#!/bin/bash -efu
+
+[ ! -f "$WORKDIR/storage.conf" ] ||
+	exit 0
+
+mkdir $verbose -p -- \
+	  "$HOMEDIR/cache"                          \
+	  "$HOMEDIR/config"                         \
+	  "$HOMEDIR/local/runtime"                  \
+	  "$HOMEDIR/local/share/containers/storage" \
+#
+
+cat > "$WORKDIR/storage.conf" <<EOF
+[storage]
+driver = "vfs"
+runroot               = "$HOMEDIR/local/runtime"
+graphroot             = "$HOMEDIR/local/share/containers/storage"
+rootless_storage_path = "$HOMEDIR/local/share/containers/storage"
+
+[storage.options]
+additionalimagestores = [
+]
+
+[storage.options.vfs]
+ignore_chown_errors = "false"
+EOF

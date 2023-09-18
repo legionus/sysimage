@@ -1,0 +1,5 @@
+PKG_INIT_LIST  = setup filesystem rpm
+PKG_INIT_LIST2 = apt
+
+INSTALL_LANGS =
+EXCLUDE_DOCS =

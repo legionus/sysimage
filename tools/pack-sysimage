@@ -1,0 +1,27 @@
+#!/bin/bash -efu
+
+. "$TOOLSDIR"/sh-functions
+
+[ -n "$IMAGEFILE" ] ||
+	fatal "IMAGEFILE variable required"
+
+"$TOOLSDIR"/podman image exists "$IMAGE_SYSIMAGE" ||
+	fatal "image \`$IMAGE_SYSIMAGE' not found"
+
+verbose "exporting image \`$IMAGE_SYSIMAGE' ..."
+
+"$TOOLSDIR"/podman container create --quiet --name sysimage "$IMAGE_SYSIMAGE" / >/dev/null
+
+"$TOOLSDIR"/podman export sysimage |
+	tar -f- --delete .host |
+	{
+		case "${COMPRESS:-raw}" in
+			zstd) zstd -19 -T0 ;;
+			gzip) gzip -9 ;;
+			raw)  cat ;;
+		esac
+	} > "$IMAGEFILE"
+
+"$TOOLSDIR"/podman container rm -f sysimage >/dev/null
+
+exit
