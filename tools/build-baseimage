@@ -1,21 +1,12 @@
 #!/bin/bash -efu
 
-. "$TOOLSDIR"/sh-functions
+. "$HOMEDIR"/env
 
-if ! "$TOOLSDIR"/podman image exists "$IMAGE_BASEIMAGE"; then
-	verbose "image creation: \`$IMAGE_BASEIMAGE'"
-
-	cp $verbose -f -- \
-		"$VENDORDIR/$VENDOR/Dockerfile.baseimage" \
-		"$HOSTDIR/Dockerfile"
-
-	"$TOOLSDIR"/podman image build --pull --squash --force-rm=true \
+if ! podman image exists "$IMAGE_BASEIMAGE"; then
+	podman image build --pull --squash --force-rm=true \
 		-v "$HOSTDIR":/.host:z \
-		-t "$IMAGE_BASEIMAGE" "$HOSTDIR"
-
-	rm $verbose -f -- "$HOSTDIR/Dockerfile"
-else
-	verbose "image \`$IMAGE_BASEIMAGE' already exists"
+		-t "$IMAGE_BASEIMAGE" \
+		-f "$VENDORDIR/$VENDOR/Dockerfile.baseimage"
 fi
 
 exit

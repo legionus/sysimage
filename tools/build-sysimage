@@ -1,32 +1,20 @@
 #!/bin/bash -efu
 
-. "$TOOLSDIR"/sh-functions
+. "$HOMEDIR"/env
 
-if ! $TOOLSDIR/podman image exists "$IMAGE_SYSIMAGE"; then
-	verbose "image creation: \`$IMAGE_SYSIMAGE'"
+SYSIMAGE_PACKAGES="${SYSIMAGE_PACKAGES:?SYSIMAGE_PACKAGES variable required}"
 
-	if [ -s "$SYSIMAGE_PACKAGES" ]; then
-		cp $verbose -f -- "$SYSIMAGE_PACKAGES" "$HOSTDIR/packages"
+if ! podman image exists "$IMAGE_SYSIMAGE"; then
+	for n in $SYSIMAGE_PACKAGES; do
+		[ -f "$n" ] &&
+			cat "$n" ||
+			printf '%s\n' "$n"
+	done > "$HOSTDIR"/packages
 
-		"$TOOLSDIR"/prepare-chrooted "download-packages"
-		"$TOOLSDIR"/podman container run --tty \
-			-v "$HOSTDIR":/.host:z \
-			"$IMAGE_BASEIMAGE"
+	prepare-chrooted "build-sysimage"
+	podman container run -v "$HOSTDIR":/.host:z "$IMAGE_BASEIMAGE"
 
-		"$TOOLSDIR"/prepare-chrooted "install-packages"
-		"$TOOLSDIR"/podman image build --squash \
-			-v "$HOSTDIR":/.host:z \
-			-t "$IMAGE_SYSIMAGE" \
-			-f - <<-EOF
-		FROM $IMAGE_SYSTEM
-		RUN /.host/run.sh
-		EOF
-	else
-		verbose "nothing to install. skipped."
-		"$TOOLSDIR"/podman image tag "$IMAGE_SYSTEM" "$IMAGE_SYSIMAGE"
-	fi
-else
-	verbose "image \`$IMAGE_SYSIMAGE' already exists"
+	podman image import "$HOSTDIR/sysimage.tar" "$IMAGE_SYSIMAGE"
 fi
 
 exit

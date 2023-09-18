@@ -5,7 +5,7 @@ rpm -ql filesystem | xargs -r mkdir -p
 
 RUN \
 apt-get -y -qq update && \
-apt-get -y -qq install cpio podman && \
+apt-get -y -qq install podman gzip zstd && \
 apt-get -y -qq clean
 
 RUN \

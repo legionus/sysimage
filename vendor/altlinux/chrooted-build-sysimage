@@ -1,0 +1,35 @@
+#!/bin/bash
+set -eu
+
+mkdir -- /image
+cd /image
+
+mkdir $verbose -p -- \
+	./dev \
+	./proc \
+	./sys \
+	./var/lib/rpm \
+#
+
+mkdir $verbose -p -- ./var/lib/rpm
+rpmdb --initdb --dbpath ./var/lib/rpm
+
+# mtab is missing in setup-2.2.2-alt1
+mkdir -p ./etc
+touch ./etc/mtab
+
+# glibc-locales is too large
+mkdir -p -- ./etc/rpm
+echo '%_install_langs ${INSTALL_LANGS:-all}' >>./etc/rpm/macros
+
+# Force the treatment of scriptlet errors as expected in install checks
+mkdir -p -- ./etc/rpm
+echo '%_rpmscript_werror 1' >>./etc/rpm/macros
+
+apt-get -y -qq update
+xargs -r apt-get -y -qq -o RPM::RootDir=/image install < /.host/packages
+
+# sync
+rpmdb --rebuilddb --dbpath ./var/lib/rpm
+
+tar -cf /.host/sysimage.tar --numeric-owner --directory /image .

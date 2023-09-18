@@ -15,9 +15,6 @@ quote_shell_variable()
 	eval "$__quote_shell_variable_var=\"\$__quote_shell_variable_out\""
 }
 
-[ -e "$HOSTDIR/sh-functions" ] ||
-	cp $verbose "$TOOLSDIR/sh-functions" "$HOSTDIR/sh-functions"
-
 exec >"$HOSTDIR/run.sh"
 chmod 755 "$HOSTDIR/run.sh"
 

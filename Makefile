@@ -6,7 +6,6 @@ WORKNAME = .work
 WORKDIR  = $(CURDIR)/$(WORKNAME)
 HOSTDIR  = $(WORKDIR)/host
 HOMEDIR  = $(WORKDIR)/home
-TEMPDIR  = $(WORKDIR)/tmp
 
 TOOLSDIR  = $(CURDIR)/tools
 VENDORDIR = $(CURDIR)/vendor
@@ -28,13 +27,11 @@ IMAGEFILE = $(CURDIR)/sysimage.tar
 include $(CURDIR)/profile.mk
 include $(CURDIR)/vendor/$(VENDOR)/config.mk
 
-CHROOTABLE_VARIABLES = VENDOR PKG_INIT_LIST INSTALL_LANGS EXCLUDE_DOCS \
+CHROOTABLE_VARIABLES = VENDOR INSTALL_LANGS EXCLUDE_DOCS \
 		       verbose
 
-IMAGE_BASEIMAGE = localhost/$(VENDOR):baseimage
-IMAGE_BOOTSTRAP = localhost/$(VENDOR):bootstrap
-IMAGE_SYSTEM    = localhost/$(VENDOR):system
-IMAGE_SYSIMAGE  = localhost/$(VENDOR):sysimage
+IMAGE_BASEIMAGE = localhost/$(VENDOR)-baseimage:latest
+IMAGE_SYSIMAGE  = localhost/$(VENDOR)-sysimage:latest
 
 # Rules
 all:
@@ -45,35 +42,32 @@ all:
 	@echo ""
 
 prepare:
-	@mkdir -p -- "$(HOSTDIR)" "$(TEMPDIR)"
+	@mkdir -p -- "$(HOSTDIR)"
 	@$(TOOLSDIR)/generate-podman-storage-conf
 
 clean:
-	$(Q)$(TOOLSDIR)/podman image rm -a -f
-	$(Q)$(TOOLSDIR)/podman system prune -a -f
+	$(Q)source $(HOMEDIR)/env && podman image rm -a -f
+	$(Q)source $(HOMEDIR)/env && podman system prune -a -f
 	$(Q)rm -rf -- "$(WORKDIR)"
 
 clean-image:
-	$(Q)$(TOOLSDIR)/podman image rm -f "$(IMAGE)"
+	$(Q)source $(HOMEDIR)/env && podman image rm -f "$(IMAGE)"
 
 list-images: prepare
-	$(Q)$(TOOLSDIR)/podman images
+	$(Q)source $(HOMEDIR)/env && podman images
 
 build-baseimage: prepare
-	@$(TOOLSDIR)/$@
+	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
-build-bootstrap: build-baseimage
-	@$(TOOLSDIR)/$@
-
-build-sysimage: build-bootstrap
-	@$(TOOLSDIR)/$@
+build-sysimage: build-baseimage
+	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
 pack-sysimage: build-sysimage
-	@$(TOOLSDIR)/$@
+	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 	@echo ""
 	@echo "Image is saved as $(IMAGEFILE)"
 	@echo ""
 
 run:
-	$(Q)$(TOOLSDIR)/podman container run --rm -ti "$(IMAGE)" /bin/bash
+	$(Q)source $(HOMEDIR)/env && podman container run --rm -ti "$(IMAGE)" /bin/bash
 

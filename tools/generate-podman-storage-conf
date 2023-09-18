@@ -1,6 +1,6 @@
 #!/bin/bash -efu
 
-[ ! -f "$WORKDIR/storage.conf" ] ||
+[ ! -f "$HOMEDIR/storage.conf" ] ||
 	exit 0
 
 mkdir $verbose -p -- \
@@ -10,7 +10,7 @@ mkdir $verbose -p -- \
 	  "$HOMEDIR/local/share/containers/storage" \
 #
 
-cat > "$WORKDIR/storage.conf" <<EOF
+cat >"$HOMEDIR/storage.conf" <<EOF
 [storage]
 driver = "vfs"
 runroot               = "$HOMEDIR/local/runtime"
@@ -23,4 +23,12 @@ additionalimagestores = [
 
 [storage.options.vfs]
 ignore_chown_errors = "false"
+EOF
+
+cat >"$HOMEDIR/env"<<EOF
+export HOME="$HOMEDIR"
+export CONTAINERS_STORAGE_CONF="$HOMEDIR/storage.conf"
+export XDG_CACHE_HOME="$HOMEDIR/cache"
+export XDG_CONFIG_HOME="$HOMEDIR/config"
+export XDG_DATA_HOME="$HOMEDIR/local/share"
 EOF
