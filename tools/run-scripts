@@ -1,0 +1,41 @@
+#!/bin/bash -eu
+
+IMAGE_SCRIPTDIR="${IMAGE_SCRIPTDIR:?IMAGE_SCRIPTDIR required}"
+
+. "$HOMEDIR"/env
+. "$TOOLSDIR"/sh-functions
+
+podman image exists "$IMAGE_SYSIMAGE" ||
+	fatal "image \`$IMAGE_SYSIMAGE' not found"
+
+mkdir -p -- "$HOSTDIR"/scripts.d
+
+for script in "$IMAGE_SCRIPTDIR"/*; do
+	[ -x "$script" ] ||
+		continue
+
+	case "$script" in
+		*~|*.bak|*.rpmnew|*.rpmsave) continue ;;
+		*) ;;
+	esac
+
+	cp $verbose -af -- "$script" "$HOSTDIR"/scripts.d/
+done
+
+cat >"$HOSTDIR/run.sh"<<'EOF'
+#!/bin/sh -eu
+for script in /.host/scripts.d/*; do
+	[ ! -x "$script" ] || "$script"
+done
+EOF
+chmod 755 "$HOSTDIR/run.sh"
+
+podman image build --squash --force-rm=true \
+        -v "$HOSTDIR":/.host:z \
+        -t "$IMAGE_SYSIMAGE" \
+        -f - <<-EOF
+FROM $IMAGE_SYSIMAGE
+RUN /.host/run.sh
+EOF
+
+exit

@@ -20,12 +20,18 @@ else
   V = @\#
 endif
 
+# run-scripts
+IMAGE_SCRIPTDIR = $(CURDIR)/image-scripts.d
+
+# pack-sysimage
 COMPRESS = raw
 IMAGEFILE = $(CURDIR)/sysimage.tar
 
-# Configuration
+# User configuration
 include $(CURDIR)/profile.mk
-include $(CURDIR)/vendor/$(VENDOR)/config.mk
+
+# Vendor-specific configuration
+include $(VENDORDIR)/$(VENDOR)/config.mk
 
 CHROOTABLE_VARIABLES = VENDOR INSTALL_LANGS EXCLUDE_DOCS \
 		       verbose
@@ -60,6 +66,9 @@ build-baseimage: prepare
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
 build-sysimage: build-baseimage
+	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
+
+run-scripts: build-sysimage
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
 pack-sysimage: build-sysimage
