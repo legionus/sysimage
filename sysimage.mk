@@ -3,12 +3,10 @@
 VERBOSE =
 WORKNAME = .work
 
-WORKDIR  = $(CURDIR)/$(WORKNAME)
-HOSTDIR  = $(WORKDIR)/host
-HOMEDIR  = $(WORKDIR)/home
+PROJECTDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
-TOOLSDIR  = $(CURDIR)/tools
-VENDORDIR = $(CURDIR)/vendor
+TOOLSDIR  = $(PROJECTDIR)/tools
+VENDORDIR = $(PROJECTDIR)/vendor
 
 ifdef VERBOSE
   verbose = -v
@@ -20,15 +18,21 @@ else
   V = @\#
 endif
 
+# Current work directory
+WORKDIR := $(CURDIR)/$(WORKNAME)
+HOSTDIR := $(WORKDIR)/host
+HOMEDIR := $(WORKDIR)/home
+
+ifeq "$(VENDOR)" ""
+  $(info variable VENDOR required)
+endif
+
 # run-scripts
-IMAGE_SCRIPTDIR = $(CURDIR)/image-scripts.d
+IMAGE_SCRIPTDIR ?= $(CURDIR)/image-scripts.d
 
 # pack-sysimage
-COMPRESS = raw
-IMAGEFILE = $(CURDIR)/sysimage.tar
-
-# User configuration
-include $(CURDIR)/profile.mk
+COMPRESS  ?= raw
+IMAGEFILE ?= $(CURDIR)/sysimage.tar
 
 # Vendor-specific configuration
 include $(VENDORDIR)/$(VENDOR)/config.mk
@@ -40,7 +44,7 @@ IMAGE_BASEIMAGE = localhost/$(VENDOR)-baseimage:latest
 IMAGE_SYSIMAGE  = localhost/$(VENDOR)-sysimage:latest
 
 # Rules
-all:
+help:
 	@echo "This makefile is designed to generate an image of the root filesystem of"
 	@echo "a specific Linux distribution vendor."
 	@echo ""
