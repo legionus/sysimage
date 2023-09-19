@@ -22,10 +22,12 @@ for script in "$IMAGE_SCRIPTDIR"/*; do
 	cp $verbose -af -- "$script" "$HOSTDIR"/scripts.d/
 done
 
-cat >"$HOSTDIR/run.sh"<<'EOF'
+cat >"$HOSTDIR/run.sh"<<EOF
 #!/bin/sh -eu
 for script in /.host/scripts.d/*; do
-	[ ! -x "$script" ] || "$script"
+	[ -x "\$script" ] || continue
+	[ -z "$verbose" ] || echo "$PROG: executing \$script ..."
+	"\$script"
 done
 EOF
 chmod 755 "$HOSTDIR/run.sh"

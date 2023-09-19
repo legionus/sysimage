@@ -67,15 +67,19 @@ list-images: prepare
 	$(Q)source $(HOMEDIR)/env && podman images
 
 build-baseimage: prepare
+	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
 build-image: build-baseimage
+	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
 run-scripts: build-image
+	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
 pack-image: build-image
+	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 	@echo ""
 	@echo "Image is saved as $(IMAGEFILE)"
