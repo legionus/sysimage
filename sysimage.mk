@@ -41,7 +41,7 @@ CHROOTABLE_VARIABLES = VENDOR INSTALL_LANGS EXCLUDE_DOCS \
 		       verbose
 
 IMAGE_BASEIMAGE = localhost/$(VENDOR)-baseimage:latest
-IMAGE_SYSIMAGE  = localhost/$(VENDOR)-sysimage:latest
+IMAGE_SYSIMAGE  = localhost/$(VENDOR)-image:latest
 
 # Rules
 help:
@@ -69,13 +69,13 @@ list-images: prepare
 build-baseimage: prepare
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
-build-sysimage: build-baseimage
+build-image: build-baseimage
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
-run-scripts: build-sysimage
+run-scripts: build-image
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
-pack-sysimage: build-sysimage
+pack-image: build-image
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 	@echo ""
 	@echo "Image is saved as $(IMAGEFILE)"

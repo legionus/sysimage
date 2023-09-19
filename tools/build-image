@@ -11,10 +11,10 @@ if ! podman image exists "$IMAGE_SYSIMAGE"; then
 			printf '%s\n' "$n"
 	done > "$HOSTDIR"/packages
 
-	prepare-chrooted "build-sysimage"
+	prepare-chrooted "build-image"
 	podman container run -v "$HOSTDIR":/.host:z "$IMAGE_BASEIMAGE"
 
-	podman image import "$HOSTDIR/sysimage.tar" "$IMAGE_SYSIMAGE"
+	podman image import "$HOSTDIR/image.tar" "$IMAGE_SYSIMAGE"
 fi
 
 exit

@@ -32,4 +32,4 @@ xargs -r apt-get -y -qq -o RPM::RootDir=/image install < /.host/packages
 # sync
 rpmdb --rebuilddb --dbpath ./var/lib/rpm
 
-tar -cf /.host/sysimage.tar --numeric-owner --directory /image .
+tar -cf /.host/image.tar --numeric-owner --directory /image .

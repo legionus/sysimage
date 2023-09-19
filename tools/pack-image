@@ -11,9 +11,9 @@ podman image exists "$IMAGE_SYSIMAGE" ||
 
 verbose "exporting image \`$IMAGE_SYSIMAGE' ..."
 
-podman container create --quiet --name sysimage "$IMAGE_SYSIMAGE" / >/dev/null
+podman container create --quiet --name image "$IMAGE_SYSIMAGE" / >/dev/null
 
-podman export sysimage |
+podman export image |
 	tar -f- --delete .host |
 	{
 		case "${COMPRESS:-raw}" in
@@ -23,6 +23,6 @@ podman export sysimage |
 		esac
 	} > "$IMAGEFILE"
 
-podman container rm -f sysimage >/dev/null
+podman container rm -f image >/dev/null
 
 exit
