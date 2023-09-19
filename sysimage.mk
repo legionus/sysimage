@@ -40,8 +40,8 @@ include $(VENDORDIR)/$(VENDOR)/config.mk
 CHROOTABLE_VARIABLES = VENDOR INSTALL_LANGS EXCLUDE_DOCS \
 		       verbose
 
-IMAGE_BASEIMAGE = localhost/$(VENDOR)-baseimage:latest
-IMAGE_SYSIMAGE  = localhost/$(VENDOR)-image:latest
+IMAGE_BASEIMAGE = localhost/$(VENDOR)-baseimage
+IMAGE_SYSIMAGE  = localhost/$(VENDOR)-image
 
 # Rules
 help:

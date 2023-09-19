@@ -4,7 +4,7 @@
 
 SYSIMAGE_PACKAGES="${SYSIMAGE_PACKAGES:?SYSIMAGE_PACKAGES variable required}"
 
-if ! podman image exists "$IMAGE_SYSIMAGE"; then
+if ! podman image exists "$IMAGE_SYSIMAGE:latest"; then
 	for n in $SYSIMAGE_PACKAGES; do
 		[ -f "$n" ] &&
 			cat "$n" ||
@@ -14,7 +14,7 @@ if ! podman image exists "$IMAGE_SYSIMAGE"; then
 	prepare-chrooted "build-image"
 	podman container run -v "$HOSTDIR":/.host:z "$IMAGE_BASEIMAGE"
 
-	podman image import "$HOSTDIR/image.tar" "$IMAGE_SYSIMAGE"
+	podman image import "$HOSTDIR/image.tar" "$IMAGE_SYSIMAGE:latest"
 fi
 
 exit

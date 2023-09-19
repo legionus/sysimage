@@ -5,8 +5,8 @@ IMAGE_SCRIPTDIR="${IMAGE_SCRIPTDIR:?IMAGE_SCRIPTDIR required}"
 . "$HOMEDIR"/env
 . "$TOOLSDIR"/sh-functions
 
-podman image exists "$IMAGE_SYSIMAGE" ||
-	fatal "image \`$IMAGE_SYSIMAGE' not found"
+podman image exists "$IMAGE_SYSIMAGE:latest" ||
+	fatal "image \`$IMAGE_SYSIMAGE:latest' not found"
 
 mkdir -p -- "$HOSTDIR"/scripts.d
 
@@ -34,9 +34,9 @@ chmod 755 "$HOSTDIR/run.sh"
 
 podman image build --squash --force-rm=true \
         -v "$HOSTDIR":/.host:z \
-        -t "$IMAGE_SYSIMAGE" \
+        -t "$IMAGE_SYSIMAGE:latest" \
         -f - <<-EOF
-FROM $IMAGE_SYSIMAGE
+FROM $IMAGE_SYSIMAGE:latest
 RUN /.host/run.sh
 EOF
 

@@ -6,12 +6,12 @@
 [ -n "$IMAGEFILE" ] ||
 	fatal "IMAGEFILE variable required"
 
-podman image exists "$IMAGE_SYSIMAGE" ||
-	fatal "image \`$IMAGE_SYSIMAGE' not found"
+podman image exists "$IMAGE_SYSIMAGE:latest" ||
+	fatal "image \`$IMAGE_SYSIMAGE:latest' not found"
 
-verbose "exporting image \`$IMAGE_SYSIMAGE' ..."
+verbose "exporting image \`$IMAGE_SYSIMAGE:latest' ..."
 
-podman container create --quiet --name image "$IMAGE_SYSIMAGE" / >/dev/null
+podman container create --quiet --name image "$IMAGE_SYSIMAGE:latest" / >/dev/null
 
 podman export image |
 	tar -f- --delete .host |
