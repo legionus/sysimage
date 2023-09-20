@@ -63,6 +63,11 @@ clean:
 clean-image:
 	$(Q)source $(HOMEDIR)/env && podman image rm -f "$(IMAGE)"
 
+reset-image:
+	$(Q)source $(HOMEDIR)/env && \
+	  podman images --filter reference="$(IMAGE_SYSIMAGE)" --format '{{.ID}}' | \
+	  xargs -r podman image rm -f
+
 list-images: prepare
 	$(Q)source $(HOMEDIR)/env && podman images
 
