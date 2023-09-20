@@ -30,6 +30,9 @@ endif
 # copy-tree
 COPY_TREE ?= $(CURDIR)/files
 
+# apply-patches
+IMAGE_PATCHES ?= $(CURDIR)/image-patches.d
+
 # run-scripts
 IMAGE_SCRIPTDIR ?= $(CURDIR)/image-scripts.d
 
@@ -87,6 +90,10 @@ copy-tree: build-image
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
 run-scripts: build-image
+	$(V)echo "processing $@ ..."
+	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
+
+apply-patches: build-image
 	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 

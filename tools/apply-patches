@@ -1,0 +1,38 @@
+#!/bin/bash -eu
+
+IMAGE_PATCHES="${IMAGE_PATCHES:?IMAGE_PATCHES required}"
+
+. "$HOMEDIR"/env
+. "$TOOLSDIR"/sh-functions
+
+tag="$PROG"
+
+! podman image exists "$IMAGE_SYSIMAGE:$tag" ||
+	exit 0
+
+podman image exists "$IMAGE_SYSIMAGE:latest" ||
+	fatal "image \`$IMAGE_SYSIMAGE:latest' not found"
+
+mkdir -p -- "$HOSTDIR"/patches.d
+cp $verbose -af -- "$IMAGE_PATCHES"/*.patch "$HOSTDIR"/patches.d/
+
+cat > "$HOSTDIR/run.sh" <<-EOF
+#!/bin/sh -eu
+for f in /.host/patches.d/*.patch; do
+	[ -z "$verbose" ] || echo "$PROG: applying \$f ..."
+	patch -p1 --merge < "\$f"
+done
+EOF
+chmod 755 "$HOSTDIR/run.sh"
+
+podman image build --squash --force-rm=true \
+        -v "$HOSTDIR":/.host:z \
+        -t "$IMAGE_SYSIMAGE:$tag" \
+        -f - <<-EOF
+FROM $IMAGE_SYSIMAGE:latest
+RUN /.host/run.sh
+EOF
+
+podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
+
+exit
