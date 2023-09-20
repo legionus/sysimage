@@ -2,16 +2,19 @@
 
 PROG="${0##*/}"
 
-message() {
+message()
+{
 	printf >&2 '%s: %s\n' "$PROG" "$*"
 }
 
-fatal() {
+fatal()
+{
 	message "$*"
 	exit 1
 }
 
-verbose() {
+verbose()
+{
 	[ -n "${verbose-}" ] || return 0
 	message "$*"
 }
@@ -29,9 +32,15 @@ quote_shell_variable()
 	eval "$__quote_shell_variable_var=\"\$__quote_shell_variable_out\""
 }
 
-print_environ_names() {
+print_environ_names()
+{
 	printenv -0 |
 		tr '\n\0' '_\n' |
 		sed -rn -e 's#^([^=]+)=.*#\1#p'
 }
 
+mkexec()
+{
+	cat >"$1"
+	chmod 755 "$1"
+}

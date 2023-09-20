@@ -1,81 +1,11 @@
 FROM alt:sisyphus
 
 RUN \
-rpm -ql filesystem | xargs -r mkdir -p
-
-RUN \
 apt-get -y -qq update && \
-apt-get -y -qq install podman gzip zstd && \
+apt-get -y -qq install bash && \
 apt-get -y -qq clean
 
-RUN \
-useradd podman; \
-echo podman:10000:5000 > /etc/subuid; \
-echo podman:10000:5000 > /etc/subgid;
-
-RUN \
-chown podman:podman -R /home/podman
-
-RUN \
-mkdir -p -- /home/podman/.config/containers
-
-RUN printf >/home/podman/.config/containers/containers.conf '%s\n' \
-'[containers]'                                                     \
-'volumes = ['                                                      \
-'  "/proc:/proc",'                                                 \
-']'                                                                \
-'default_sysctls = []'                                             \
-''
-
-RUN printf >/etc/containers/containers.conf '%s\n' \
-'[containers]'                                     \
-'netns = "host"'                                   \
-'userns = "host"'                                  \
-'ipcns = "host"'                                   \
-'utsns = "host"'                                   \
-'cgroupns = "host"'                                \
-'cgroups = "disabled"'                             \
-'log_driver = "passthrough"'                       \
-''                                                 \
-'[engine]'                                         \
-'cgroup_manager = "cgroupfs"'                      \
-'events_logger = "file"'                           \
-'runtime = "crun"'                                 \
-''
-
-RUN printf >/etc/containers/storage.conf '%s\n' \
-'[storage]'                                     \
-'driver = "vfs"'                                \
-'runroot = "/run/containers/storage"'           \
-'graphroot = "/var/lib/containers/storage"'     \
-''                                              \
-'[storage.options]'                             \
-'additionalimagestores = ['                     \
-'  "/var/lib/shared",'                          \
-']'                                             \
-''                                              \
-'[storage.options.vfs]'                         \
-'ignore_chown_errors = "false"'                 \
-''
-
-RUN \
-mkdir -p -- \
- /var/lib/shared/vfs-images \
- /var/lib/shared/vfs-layers; \
-touch \
- /var/lib/shared/vfs-images/images.lock \
- /var/lib/shared/vfs-layers/layers.lock;
-
 VOLUME /.host
-VOLUME /var/lib/containers
-
-# Set up environment variables to note that this is
-# not starting with user namespace and default to
-# isolate the filesystem with chroot.
-#ENV BUILDAH_ISOLATION=chroot
-#ENV _BUILDAH_STARTED_IN_USERNS=""
-ENV _CONTAINERS_USERNS_CONFIGURED=""
-
 CMD /.host/run.sh
 
 # vim: ft=dockerfile

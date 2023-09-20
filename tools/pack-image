@@ -24,5 +24,3 @@ podman export image |
 	} > "$IMAGEFILE"
 
 podman container rm -f image >/dev/null
-
-exit

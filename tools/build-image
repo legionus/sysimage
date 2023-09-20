@@ -5,22 +5,39 @@
 
 IMAGE_PACKAGES="${IMAGE_PACKAGES:?IMAGE_PACKAGES variable required}"
 
-if ! podman image exists "$IMAGE_SYSIMAGE:latest"; then
-	for n in $IMAGE_PACKAGES; do
-		[ -f "$n" ] &&
-			cat "$n" ||
-			printf '%s\n' "$n"
-	done > "$HOSTDIR"/packages
+! podman image exists "$IMAGE_SYSIMAGE:latest" ||
+	exit 0
 
-	prepare-chrooted "build-image"
-	podman container run -v "$HOSTDIR":/.host:z "$IMAGE_BASEIMAGE"
+for n in $IMAGE_PACKAGES; do
+	[ -f "$n" ] &&
+		cat "$n" ||
+		printf '%s\n' "$n"
+done > "$HOSTDIR"/packages
 
-	tag="$PROG"
+{
+	cat <<-'EOF'
+	#!/bin/bash
 
-	podman image import "$HOSTDIR/image.tar" "$IMAGE_SYSIMAGE:$tag"
-	podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
+	export LC_ALL=C
+	export LANG=C
+	export LANGUAGE=C
+	PROG="${0##*/}"
+	EOF
 
-	rm -rf -- "$WORKDIR/targets"
-fi
+	for envname in ${CHROOTABLE_VARIABLES-}; do
+		eval "envval=\"\${$envname-}\""
+		quote_shell_variable envval "$envval"
+		printf 'export %s="%s"\n' "$envname" "$envval"
+	done
 
-exit
+	cat "$VENDORDIR/$VENDOR/chrooted-build-image"
+} | mkexec "$HOSTDIR/run.sh"
+
+podman container run -v "$HOSTDIR":/.host:z "$IMAGE_BASEIMAGE" /.host/run.sh
+
+tag="$PROG"
+
+podman image import "$HOSTDIR/image.tar" "$IMAGE_SYSIMAGE:$tag"
+podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
+
+rm -rf -- "$WORKDIR/targets"

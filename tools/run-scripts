@@ -27,17 +27,13 @@ for script in "$IMAGE_SCRIPTDIR"/*; do
 	cp $verbose -af -- "$script" "$HOSTDIR"/scripts.d/
 done
 
+print_environ()
 {
-	printf '#!/bin/sh -eu\n'
-
 	print_environ_names | sort |
 	while read -r envname; do
 		case "$envname" in
-			GLOBAL_*|INFO_*)
-				;;
-			*)
-				continue
-				;;
+			INFO_*) ;;
+			*) continue ;;
 		esac
 
 		envval=
@@ -47,16 +43,17 @@ done
 		verbose "export $envname=\"$envval\""
 		printf 'export %s="%s"\n' "$envname" "$envval"
 	done
+}
 
-	cat <<-EOF
-	for script in /.host/scripts.d/*; do
-		[ -x "\$script" ] || continue
-		[ -z "$verbose" ] || echo "$PROG: executing \$script ..."
-		"\$script"
-	done
-	EOF
-} > "$HOSTDIR/run.sh"
-chmod 755 "$HOSTDIR/run.sh"
+mkexec "$HOSTDIR/run.sh" <<EOF
+#!/bin/sh -eu
+`print_environ`
+for script in /.host/scripts.d/*; do
+	[ -x "\$script" ] || continue
+	[ -z "$verbose" ] || echo "$PROG: executing \$script ..."
+	"\$script"
+done
+EOF
 
 podman image build --squash --force-rm=true \
         -v "$HOSTDIR":/.host:z \
@@ -67,5 +64,3 @@ RUN /.host/run.sh
 EOF
 
 podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
-
-exit

@@ -16,14 +16,13 @@ podman image exists "$IMAGE_SYSIMAGE:latest" ||
 mkdir -p -- "$HOSTDIR"/patches.d
 cp $verbose -af -- "$IMAGE_PATCHES"/*.patch "$HOSTDIR"/patches.d/
 
-cat > "$HOSTDIR/run.sh" <<-EOF
+mkexec "$HOSTDIR/run.sh" <<-EOF
 #!/bin/sh -eu
 for f in /.host/patches.d/*.patch; do
 	[ -z "$verbose" ] || echo "$PROG: applying \$f ..."
 	patch -p1 --merge < "\$f"
 done
 EOF
-chmod 755 "$HOSTDIR/run.sh"
 
 podman image build --squash --force-rm=true \
         -v "$HOSTDIR":/.host:z \
@@ -34,5 +33,3 @@ RUN /.host/run.sh
 EOF
 
 podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
-
-exit

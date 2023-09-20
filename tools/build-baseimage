@@ -2,11 +2,10 @@
 
 . "$HOMEDIR"/env
 
-if ! podman image exists "$IMAGE_BASEIMAGE:latest"; then
-	podman image build --pull --squash --force-rm=true \
-		-v "$HOSTDIR":/.host:z \
-		-t "$IMAGE_BASEIMAGE:latest" \
-		-f "$VENDORDIR/$VENDOR/Dockerfile.baseimage"
-fi
+! podman image exists "$IMAGE_BASEIMAGE:latest" ||
+	exit 0
 
-exit
+podman image build --squash --force-rm=true \
+	-v "$HOSTDIR":/.host:z \
+	-t "$IMAGE_BASEIMAGE:latest" \
+	-f "$VENDORDIR/$VENDOR/Dockerfile.baseimage"

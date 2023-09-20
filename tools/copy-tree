@@ -27,5 +27,3 @@ COPY "./$subdir/" /
 EOF
 
 podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
-
-exit
