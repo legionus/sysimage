@@ -3,10 +3,10 @@
 . "$HOMEDIR"/env
 . "$TOOLSDIR"/sh-functions
 
-SYSIMAGE_PACKAGES="${SYSIMAGE_PACKAGES:?SYSIMAGE_PACKAGES variable required}"
+IMAGE_PACKAGES="${IMAGE_PACKAGES:?IMAGE_PACKAGES variable required}"
 
 if ! podman image exists "$IMAGE_SYSIMAGE:latest"; then
-	for n in $SYSIMAGE_PACKAGES; do
+	for n in $IMAGE_PACKAGES; do
 		[ -f "$n" ] &&
 			cat "$n" ||
 			printf '%s\n' "$n"
