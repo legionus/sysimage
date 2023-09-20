@@ -27,14 +27,35 @@ for script in "$IMAGE_SCRIPTDIR"/*; do
 	cp $verbose -af -- "$script" "$HOSTDIR"/scripts.d/
 done
 
-cat >"$HOSTDIR/run.sh"<<EOF
-#!/bin/sh -eu
-for script in /.host/scripts.d/*; do
-	[ -x "\$script" ] || continue
-	[ -z "$verbose" ] || echo "$PROG: executing \$script ..."
-	"\$script"
-done
-EOF
+{
+	printf '#!/bin/sh -eu\n'
+
+	print_environ_names | sort |
+	while read -r envname; do
+		case "$envname" in
+			GLOBAL_*|INFO_*)
+				;;
+			*)
+				continue
+				;;
+		esac
+
+		envval=
+		eval "envval=\"\$$envname\""
+		quote_shell_variable envval "$envval"
+
+		verbose "export $envname=\"$envval\""
+		printf 'export %s="%s"\n' "$envname" "$envval"
+	done
+
+	cat <<-EOF
+	for script in /.host/scripts.d/*; do
+		[ -x "\$script" ] || continue
+		[ -z "$verbose" ] || echo "$PROG: executing \$script ..."
+		"\$script"
+	done
+	EOF
+} > "$HOSTDIR/run.sh"
 chmod 755 "$HOSTDIR/run.sh"
 
 podman image build --squash --force-rm=true \

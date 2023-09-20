@@ -1,19 +1,8 @@
 #!/bin/bash -efu
 
-name="$1"; shift
+. "$TOOLSDIR"/sh-functions
 
-quote_shell_variable()
-{
-	local __quote_shell_variable_var __quote_shell_variable_out
-	__quote_shell_variable_var="$1"; shift
-	__quote_shell_variable_out="$*"
-	if [ -z "${__quote_shell_variable_out##*[\"\$\`\\\\]*}" ]; then
-		__quote_shell_variable_out="$(printf %s "$__quote_shell_variable_out" |
-				sed -e 's/[\"$\`\\]/\\&/g')" ||
-			return 1
-	fi
-	eval "$__quote_shell_variable_var=\"\$__quote_shell_variable_out\""
-}
+name="$1"; shift
 
 exec >"$HOSTDIR/run.sh"
 chmod 755 "$HOSTDIR/run.sh"
