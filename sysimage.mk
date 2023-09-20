@@ -27,6 +27,9 @@ ifeq "$(VENDOR)" ""
   $(info variable VENDOR required)
 endif
 
+# copy-tree
+COPY_TREE ?= $(CURDIR)/files
+
 # run-scripts
 IMAGE_SCRIPTDIR ?= $(CURDIR)/image-scripts.d
 
@@ -76,6 +79,10 @@ build-baseimage: prepare
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
 build-image: build-baseimage
+	$(V)echo "processing $@ ..."
+	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
+
+copy-tree: build-image
 	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 

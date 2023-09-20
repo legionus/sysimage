@@ -1,0 +1,31 @@
+#!/bin/bash -efu
+
+COPY_TREE="${COPY_TREE:?COPY_TREE required}"
+
+. "$HOMEDIR"/env
+. "$TOOLSDIR"/sh-functions
+
+tag="$PROG"
+
+! podman image exists "$IMAGE_SYSIMAGE:$tag" ||
+	exit 0
+
+podman image exists "$IMAGE_SYSIMAGE:latest" ||
+	fatal "image \`$IMAGE_SYSIMAGE:latest' not found"
+
+subdir="${COPY_TREE#$CURDIR/}"
+
+[ -n "$subdir" ] && [ -d "./$subdir" ] ||
+	fatal "COPY_TREE is not a subdirectory of profile directory"
+
+podman image build --squash --force-rm=true \
+        -v "$HOSTDIR":/.host:z \
+        -t "$IMAGE_SYSIMAGE:$tag" \
+        -f - "$CURDIR" <<-EOF
+FROM $IMAGE_SYSIMAGE:latest
+COPY "./$subdir/" /
+EOF
+
+podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
+
+exit
