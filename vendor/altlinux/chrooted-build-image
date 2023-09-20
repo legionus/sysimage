@@ -30,6 +30,16 @@ apt-get -y -qq update
 xargs -r apt-get -y -qq -o RPM::RootDir=/image install < /.host/packages
 
 # sync
-rpmdb --rebuilddb --dbpath ./var/lib/rpm
+while :; do
+	for proc_root in /proc/*/root; do
+		proc_root="$(readlink "$proc_root" 2>/dev/null)" ||
+			continue
+		if [ "$proc_root" = "/image" ]; then
+			sleep 1
+			continue 2
+		fi
+	done
+	break
+done
 
 tar -cf /.host/image.tar --numeric-owner --directory /image .
