@@ -27,6 +27,9 @@ ifeq "$(VENDOR)" ""
   $(info variable VENDOR required)
 endif
 
+# build-baseimage
+BASEIMAGE_PACKAGES ?=
+
 # copy-tree
 COPY_TREE ?= $(CURDIR)/files
 

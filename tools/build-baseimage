@@ -7,5 +7,6 @@
 
 podman image build --squash --force-rm=true \
 	-v "$HOSTDIR":/.host:z \
+	--build-arg extra="${BASEIMAGE_PACKAGES-}" \
 	-t "$IMAGE_BASEIMAGE:latest" \
 	-f "$VENDORDIR/$VENDOR/Dockerfile.baseimage"

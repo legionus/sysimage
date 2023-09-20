@@ -2,7 +2,7 @@ FROM alt:sisyphus
 
 RUN \
 apt-get -y -qq update && \
-apt-get -y -qq install bash && \
+apt-get -y -qq install bash $extra && \
 apt-get -y -qq clean
 
 VOLUME /.host
