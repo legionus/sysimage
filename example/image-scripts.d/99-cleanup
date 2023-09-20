@@ -1,0 +1,6 @@
+#!/bin/sh -efu
+
+rm -v -f /etc/machine-id /var/lib/dbus/machine-id
+rm -v -f /var/lib/systemd/random-seed
+rm -v -f /var/lib/rpm/__db*
+rm -v -f /var/cache/ldconfig/aux-cache

@@ -1,0 +1,23 @@
+#!/bin/bash -eu
+
+starname="$INFO_DIST_VENDOR $INFO_DIST_REPO Star"
+
+cat > /etc/issue <<EOF
+Welcome to $starname $INFO_DATE (\r) / \l
+EOF
+
+cat > /etc/altlinux-release <<EOF
+$starname $INFO_DATE
+EOF
+
+cat > /etc/os-release <<EOF
+NAME=$INFO_DIST_VENDOR
+VERSION=$INFO_DATE
+ID=${INFO_DIST_VENDOR,,}
+VERSION_ID=$INFO_DATE
+PRETTY_NAME="$starname"
+ANSI_COLOR="1;33"
+CPE_NAME="cpe:/o:${INFO_DIST_VENDOR,,}:${INFO_DIST_REPO,,}:$INFO_DATE"
+HOME_URL="https://www.altlinux.org"
+BUG_REPORT_URL="https://bugzilla.altlinux.org"
+EOF
