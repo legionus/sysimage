@@ -5,16 +5,17 @@ ARG extra2=
 ARG verbose=
 
 RUN \
+mkdir -p -- /.host/cache/apt/partial
+
+RUN \
 apt-get -y -qq update && \
-apt-get -y -qq install apt socat $extra && \
-apt-get -y -qq clean ||:
+apt-get -y -qq -o Dir::Cache::archives=/.host/cache/apt install apt socat $extra ||:
 
 RUN test -d /.host/files && \
 find /.host/files/ -mindepth 1 -maxdepth 1 -exec cp $verbose -arft / -- '{}' '+' ||:
 
 RUN test -n "$extra2" && \
 apt-get -y -qq update && \
-apt-get -y -qq install $extra2 && \
-apt-get -y -qq clean ||:
+apt-get -y -qq -o Dir::Cache::archives=/.host/cache/apt install $extra2 ||:
 
 # vim: ft=dockerfile

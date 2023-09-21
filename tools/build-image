@@ -33,7 +33,10 @@ done > "$HOSTDIR"/packages
 	cat "$VENDORDIR/$VENDOR/chrooted-build-image"
 } | mkexec "$HOSTDIR/$PROG.chrooted"
 
-podman container run -v "$HOSTDIR":/.host:z "$IMAGE_BASEIMAGE" "/.host/$PROG.chrooted"
+podman container run \
+	-v "$HOSTDIR":/.host:z \
+	-v "$CACHEDIR":/.host/cache:z \
+	"$IMAGE_BASEIMAGE" "/.host/$PROG.chrooted"
 
 tag="$PROG"
 

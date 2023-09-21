@@ -11,7 +11,9 @@ set --
 	set -- "$@" -v "$BASEIMAGE_FILES:/.host/files:z"
 
 podman image build \
-	-v "$HOSTDIR":/.host:z "$@" \
+	-v "$HOSTDIR":/.host:z \
+	-v "$CACHEDIR":/.host/cache:z \
+	"$@" \
 	--build-arg verbose="$verbose" \
 	--build-arg extra="${BASEIMAGE_PACKAGES-}" \
 	--build-arg extra2="${BASEIMAGE_PACKAGES2-}" \

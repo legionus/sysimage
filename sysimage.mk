@@ -22,6 +22,7 @@ endif
 WORKDIR := $(CURDIR)/$(WORKNAME)
 HOSTDIR := $(WORKDIR)/host
 HOMEDIR := $(WORKDIR)/home
+CACHEDIR ?= $(WORKDIR)/cache
 
 ifeq "$(VENDOR)" ""
   $(info variable VENDOR required)
@@ -61,7 +62,7 @@ help:
 	@echo ""
 
 prepare:
-	@mkdir -p -- "$(HOSTDIR)"
+	@mkdir -p -- "$(HOSTDIR)" "$(CACHEDIR)"
 	@$(TOOLSDIR)/generate-podman-storage-conf
 
 clean:

@@ -29,7 +29,12 @@ echo '%_rpmscript_werror 1' >>./etc/rpm/macros
 socat -u UNIX-RECV:/image/dev/log,ignoreeof GOPEN:/dev/null &
 
 apt-get -y update
-xargs -r apt-get -y -o RPM::RootDir=/image install < /.host/packages
+
+mkdir -p -- /.host/cache/apt/partial
+xargs -r apt-get -y \
+	-o Dir::Cache::archives=/.host/cache/apt \
+	-o RPM::RootDir=/image \
+	install < /.host/packages
 
 # sync
 while :; do
