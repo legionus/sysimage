@@ -80,6 +80,9 @@ reset-image:
 list-images: prepare
 	$(Q)source $(HOMEDIR)/env && podman images
 
+list-tree: prepare
+	$(Q)source $(HOMEDIR)/env && podman image tree "$(IMAGE_SYSIMAGE)"
+
 build-baseimage: prepare
 	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
