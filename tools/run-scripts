@@ -45,7 +45,7 @@ print_environ()
 	done
 }
 
-mkexec "$HOSTDIR/run.sh" <<EOF
+mkexec "$HOSTDIR/$PROG.chrooted" <<EOF
 #!/bin/sh -eu
 `print_environ`
 for script in /.host/scripts.d/*; do
@@ -60,7 +60,7 @@ podman image build --squash --force-rm=true \
         -t "$IMAGE_SYSIMAGE:$tag" \
         -f - <<-EOF
 FROM $IMAGE_SYSIMAGE:latest
-RUN /.host/run.sh
+RUN /.host/$PROG.chrooted
 EOF
 
 podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
