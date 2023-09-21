@@ -5,8 +5,18 @@
 ! podman image exists "$IMAGE_BASEIMAGE:latest" ||
 	exit 0
 
+set --
+
+[ -z "${BASEIMAGE_FILES-}" ] ||
+	set -- "$@" -v "$BASEIMAGE_FILES:/.host/files:z"
+
 podman image build --squash --force-rm=true \
-	-v "$HOSTDIR":/.host:z \
+	-v "$HOSTDIR":/.host:z "$@" \
+	--build-arg verbose="$verbose" \
 	--build-arg extra="${BASEIMAGE_PACKAGES-}" \
+	--build-arg extra2="${BASEIMAGE_PACKAGES2-}" \
 	-t "$IMAGE_BASEIMAGE:latest" \
 	-f "$VENDORDIR/$VENDOR/Dockerfile.baseimage"
+
+[ ! -d "$HOSTDIR"/.host/files ] ||
+	rm -rf -- "$HOSTDIR":/.host/files

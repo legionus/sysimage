@@ -1,11 +1,20 @@
 FROM alt:sisyphus
 
-RUN \
-apt-get -y -qq update && \
-apt-get -y -qq install bash $extra && \
-apt-get -y -qq clean
+ARG extra=
+ARG extra2=
+ARG verbose=
 
-VOLUME /.host
-CMD /.host/run.sh
+RUN test -n "$extra" && \
+apt-get -y -qq update && \
+apt-get -y -qq install $extra && \
+apt-get -y -qq clean ||:
+
+RUN test -d /.host/files && \
+find /.host/files/ -mindepth 1 -maxdepth 1 -exec cp $verbose -arft / -- '{}' '+' ||:
+
+RUN test -n "$extra2" && \
+apt-get -y -qq update && \
+apt-get -y -qq install $extra2 && \
+apt-get -y -qq clean ||:
 
 # vim: ft=dockerfile
