@@ -15,12 +15,6 @@ podman container create --quiet --name image "$IMAGE_SYSIMAGE:latest" / >/dev/nu
 
 podman export image |
 	tar -f- --delete .host |
-	{
-		case "${COMPRESS:-raw}" in
-			zstd) zstd -19 -T0 ;;
-			gzip) gzip -9 ;;
-			raw)  cat ;;
-		esac
-	} > "$IMAGEFILE"
+	${COMPRESS:-cat} > "$IMAGEFILE"
 
 podman container rm -f image >/dev/null
