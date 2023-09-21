@@ -26,8 +26,11 @@ echo '%_install_langs ${INSTALL_LANGS:-all}' >>./etc/rpm/macros
 mkdir -p -- ./etc/rpm
 echo '%_rpmscript_werror 1' >>./etc/rpm/macros
 
-apt-get -y -qq update
-xargs -r apt-get -y -qq -o RPM::RootDir=/image install < /.host/packages
+apt_args=
+[ -n "$verbose" ] || apt_args=-qq
+
+apt-get -y $apt_args update
+xargs -r apt-get -y $apt_args -o RPM::RootDir=/image install < /.host/packages
 
 # sync
 while :; do
