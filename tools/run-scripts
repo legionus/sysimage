@@ -55,7 +55,7 @@ for script in /.host/scripts.d/*; do
 done
 EOF
 
-podman image build --squash --force-rm=true \
+podman image build \
         -v "$HOSTDIR":/.host:z \
         -t "$IMAGE_SYSIMAGE:$tag" \
         -f - <<-EOF

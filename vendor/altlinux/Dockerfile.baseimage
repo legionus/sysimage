@@ -4,9 +4,9 @@ ARG extra=
 ARG extra2=
 ARG verbose=
 
-RUN test -n "$extra" && \
+RUN \
 apt-get -y -qq update && \
-apt-get -y -qq install $extra && \
+apt-get -y -qq install apt socat $extra && \
 apt-get -y -qq clean ||:
 
 RUN test -d /.host/files && \

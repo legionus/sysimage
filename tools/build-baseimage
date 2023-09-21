@@ -10,7 +10,7 @@ set --
 [ -z "${BASEIMAGE_FILES-}" ] ||
 	set -- "$@" -v "$BASEIMAGE_FILES:/.host/files:z"
 
-podman image build --squash --force-rm=true \
+podman image build \
 	-v "$HOSTDIR":/.host:z "$@" \
 	--build-arg verbose="$verbose" \
 	--build-arg extra="${BASEIMAGE_PACKAGES-}" \

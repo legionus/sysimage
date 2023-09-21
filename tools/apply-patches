@@ -24,7 +24,7 @@ for f in /.host/patches.d/*.patch; do
 done
 EOF
 
-podman image build --squash --force-rm=true \
+podman image build \
         -v "$HOSTDIR":/.host:z \
         -t "$IMAGE_SYSIMAGE:$tag" \
         -f - <<-EOF
