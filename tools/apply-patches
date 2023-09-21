@@ -14,23 +14,14 @@ podman image exists "$IMAGE_SYSIMAGE:latest" ||
 	fatal "image \`$IMAGE_SYSIMAGE:latest' not found"
 
 mkdir -p -- "$HOSTDIR"/patches.d
-cp $verbose -af -- "$IMAGE_PATCHES"/*.patch "$HOSTDIR"/patches.d/
-
-mkexec "$HOSTDIR/$PROG.chrooted" <<-EOF
-#!/bin/sh -eu
-for f in /.host/patches.d/*.patch; do
-	[ -z "$verbose" ] || echo "$PROG: applying \$f ..."
-	patch -p1 --merge < "\$f"
-done
-EOF
-
-podman image build \
-        -v "$HOSTDIR":/.host:z \
-        -t "$IMAGE_SYSIMAGE:$tag" \
-        -f - <<-EOF
-FROM $IMAGE_SYSIMAGE:latest
-RUN /.host/$PROG.chrooted
-EOF
+{
+	printf 'FROM %s\n' "$IMAGE_SYSIMAGE:latest"
+	for f in "$HOSTDIR"/patches.d/*.patch; do
+		cp -f -- "$f" "$HOSTDIR"/patches.d/
+		printf 'RUN patch -p1 --merge < "/.host/patches.d/%s"\n' "${f##*/}"
+	done
+} |
+	podman image build -v "$HOSTDIR":/.host:z -t "$IMAGE_SYSIMAGE:$tag" -f-
 
 podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
 

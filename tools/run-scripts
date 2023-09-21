@@ -14,21 +14,10 @@ podman image exists "$IMAGE_SYSIMAGE:latest" ||
 	fatal "image \`$IMAGE_SYSIMAGE:latest' not found"
 
 mkdir -p -- "$HOSTDIR"/scripts.d
-
-for script in "$IMAGE_SCRIPTDIR"/*; do
-	[ -x "$script" ] ||
-		continue
-
-	case "$script" in
-		*~|*.bak|*.rpmnew|*.rpmsave) continue ;;
-		*) ;;
-	esac
-
-	cp $verbose -af -- "$script" "$HOSTDIR"/scripts.d/
-done
-
-print_environ()
 {
+	printf 'FROM %s\n' "$IMAGE_SYSIMAGE:latest"
+	printf 'ENV verbose="%s"\n' "$verbose"
+
 	print_environ_names | sort |
 	while read -r envname; do
 		case "$envname" in
@@ -40,28 +29,22 @@ print_environ()
 		eval "envval=\"\$$envname\""
 		quote_shell_variable envval "$envval"
 
-		verbose "export $envname=\"$envval\""
-		printf 'export %s="%s"\n' "$envname" "$envval"
+		printf 'ENV %s="%s"\n' "$envname" "$envval"
 	done
-}
 
-mkexec "$HOSTDIR/$PROG.chrooted" <<EOF
-#!/bin/sh -eu
-`print_environ`
-for script in /.host/scripts.d/*; do
-	[ -x "\$script" ] || continue
-	[ -z "$verbose" ] || echo "$PROG: executing \$script ..."
-	"\$script"
-done
-EOF
+	for f in "$IMAGE_SCRIPTDIR"/*; do
+		[ -x "$f" ] ||
+			continue
+		case "$f" in
+			*~|*.bak|*.rpmnew|*.rpmsave) continue ;;
+			*) ;;
+		esac
+		cp -af -- "$f" "$HOSTDIR"/scripts.d/
 
-podman image build \
-        -v "$HOSTDIR":/.host:z \
-        -t "$IMAGE_SYSIMAGE:$tag" \
-        -f - <<-EOF
-FROM $IMAGE_SYSIMAGE:latest
-RUN /.host/$PROG.chrooted
-EOF
+		printf 'RUN "/.host/scripts.d/%s"\n' "${f##*/}"
+	done
+} |
+	podman image build -v "$HOSTDIR":/.host:z -t "$IMAGE_SYSIMAGE:$tag" -f-
 
 podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
 
