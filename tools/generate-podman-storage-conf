@@ -13,7 +13,7 @@ mkdir $verbose -p -- \
 
 cat >"$HOMEDIR/storage.conf" <<EOF
 [storage]
-driver = "vfs"
+driver = "overlay"
 runroot               = "$HOMEDIR/local/runtime"
 graphroot             = "$HOMEDIR/local/share/containers/storage"
 rootless_storage_path = "$HOMEDIR/local/share/containers/storage"
