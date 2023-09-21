@@ -40,4 +40,4 @@ tag="$PROG"
 podman image import "$HOSTDIR/image.tar" "$IMAGE_SYSIMAGE:$tag"
 podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
 
-rm -rf -- "$WORKDIR/targets"
+find "$HOSTDIR" -mindepth 1 -maxdepth 1 -exec rm -rf -- '{}' '+'
