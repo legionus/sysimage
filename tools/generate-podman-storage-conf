@@ -8,6 +8,7 @@ mkdir $verbose -p -- \
 	  "$HOMEDIR/config"                         \
 	  "$HOMEDIR/local/runtime"                  \
 	  "$HOMEDIR/local/share/containers/storage" \
+	  "$HOMEDIR/tmp"                            \
 #
 
 cat >"$HOMEDIR/storage.conf" <<EOF
@@ -27,6 +28,7 @@ EOF
 
 cat >"$HOMEDIR/env"<<EOF
 export HOME="$HOMEDIR"
+export TMPDIR="$HOMEDIR/tmp"
 export CONTAINERS_STORAGE_CONF="$HOMEDIR/storage.conf"
 export XDG_CACHE_HOME="$HOMEDIR/cache"
 export XDG_CONFIG_HOME="$HOMEDIR/config"
