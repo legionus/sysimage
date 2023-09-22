@@ -111,9 +111,6 @@ apply-patches: build-image
 pack-image: build-image
 	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
-	@echo ""
-	@echo "Image is saved as $(IMAGEFILE)"
-	@echo ""
 
 run:
 	$(Q)source $(HOMEDIR)/env && podman container run --rm -ti "$(IMAGE)" /bin/bash
