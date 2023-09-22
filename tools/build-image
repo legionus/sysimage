@@ -11,9 +11,11 @@ IMAGE_PACKAGES="${IMAGE_PACKAGES:?IMAGE_PACKAGES variable required}"
 	exit 0
 
 for n in $IMAGE_PACKAGES; do
-	[ -f "$n" ] &&
-		cat "$n" ||
+	if [ -f "$n" ]; then
+		grep -v -e '^#' "$n" ||:
+	else
 		printf '%s\n' "$n"
+	fi
 done > "$HOSTDIR"/packages
 
 {
