@@ -26,6 +26,7 @@ WORKDIR := $(CURDIR)/$(WORKNAME)
 HOSTDIR := $(WORKDIR)/host
 HOMEDIR := $(WORKDIR)/home
 CACHEDIR ?= $(WORKDIR)/cache
+OUTDIR ?= $(CURDIR)/result
 
 ifeq "$(VENDOR)" ""
   $(info variable VENDOR required)
@@ -45,7 +46,7 @@ IMAGE_SCRIPTDIR ?= $(CURDIR)/image-scripts.d
 
 # pack-sysimage
 COMPRESS ?=
-IMAGEFILE ?= $(CURDIR)/sysimage.tar
+IMAGENAME ?= sysimage.tar
 
 # Vendor-specific configuration
 include $(VENDORDIR)/$(VENDOR)/config.mk
