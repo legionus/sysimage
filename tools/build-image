@@ -35,10 +35,17 @@ done > "$HOSTDIR"/packages
 	cat "$VENDORDIR/$VENDOR/chrooted-build-image"
 } | mkexec "$HOSTDIR/$PROG.chrooted"
 
-podman container run \
-	-v "$HOSTDIR":/.host:z \
-	-v "$CACHEDIR":/.host/cache:z \
-	"$IMAGE_BASEIMAGE" "/.host/$PROG.chrooted"
+volumes=()
+volumes+=( -v "$HOSTDIR":/.host:z )
+volumes+=( -v "$CACHEDIR":/.host/cache:z )
+
+if [ -n "${IMAGE_PREFILES-}" ]; then
+	[ -d "${IMAGE_PREFILES-}" ] ||
+		fatal "IMAGE_PREFILES must be a directory"
+	volumes+=( -v "$IMAGE_PREFILES":/.host/prefiles:z )
+fi
+
+podman container run "${volumes[@]}" "$IMAGE_BASEIMAGE" "/.host/$PROG.chrooted"
 
 tag="$PROG"
 
