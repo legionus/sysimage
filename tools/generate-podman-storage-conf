@@ -1,4 +1,6 @@
 #!/bin/bash -efu
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2023  Alexey Gladkov <gladkov.alexey@gmail.com>
 
 [ ! -f "$HOMEDIR/storage.conf" ] ||
 	exit 0

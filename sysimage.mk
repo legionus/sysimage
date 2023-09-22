@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2023  Alexey Gladkov <gladkov.alexey@gmail.com>
+
 .EXPORT_ALL_VARIABLES:
 
 VERBOSE =
