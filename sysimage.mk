@@ -44,7 +44,7 @@ IMAGE_PATCHES ?= $(CURDIR)/image-patches.d
 IMAGE_SCRIPTDIR ?= $(CURDIR)/image-scripts.d
 
 # pack-sysimage
-COMPRESS  ?= raw
+COMPRESS ?=
 IMAGEFILE ?= $(CURDIR)/sysimage.tar
 
 # Vendor-specific configuration
