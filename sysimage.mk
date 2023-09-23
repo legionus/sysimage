@@ -48,11 +48,7 @@ IMAGE_SCRIPTDIR ?= $(CURDIR)/image-scripts.d
 COMPRESS ?=
 IMAGENAME ?= sysimage.tar
 
-# Vendor-specific configuration
-include $(VENDORDIR)/$(VENDOR)/config.mk
-
-CHROOTABLE_VARIABLES = VENDOR INSTALL_LANGS EXCLUDE_DOCS \
-		       verbose
+CHROOTABLE_VARIABLES = verbose
 
 IMAGE_BASEIMAGE = localhost/$(VENDOR)-baseimage
 IMAGE_SYSIMAGE  = localhost/$(VENDOR)-image
