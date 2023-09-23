@@ -18,7 +18,7 @@ podman image exists "$IMAGE_SYSIMAGE:latest" ||
 mkdir -p -- "$HOSTDIR"/patches.d
 {
 	printf 'FROM %s\n' "$IMAGE_SYSIMAGE:latest"
-	for f in "$HOSTDIR"/patches.d/*.patch; do
+	for f in "$IMAGE_PATCHES"/*.patch; do
 		cp -f -- "$f" "$HOSTDIR"/patches.d/
 		printf 'RUN patch -p1 --merge < "/.host/patches.d/%s"\n' "${f##*/}"
 	done
