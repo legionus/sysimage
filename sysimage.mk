@@ -70,8 +70,11 @@ prepare:
 	@$(TOOLSDIR)/generate-podman-storage-conf
 
 clean:
-	$(Q)source $(HOMEDIR)/env && podman image rm -a -f
-	$(Q)source $(HOMEDIR)/env && podman system prune -a -f
+	$(Q)if [ -f "$(HOMEDIR)/env" ]; then \
+	  source $(HOMEDIR)/env && \
+	  podman image rm -a -f && \
+	  podman system prune -a -f; \
+	fi
 	$(Q)rm -rf -- "$(WORKDIR)"
 
 clean-image:
