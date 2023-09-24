@@ -46,3 +46,32 @@ mkexec()
 	cat >"$1"
 	chmod 755 "$1"
 }
+
+create_vendor_helper()
+{
+	{
+		cat <<-'EOF'
+		#!/bin/bash
+		export LC_ALL=C
+		export LANG=C
+		export LANGUAGE=C
+		export PROG="${0##*/}"
+		export verbose="$verbose"
+		EOF
+		print_environ_names | sort |
+		while read -r envname; do
+			case "$envname" in
+				IMAGE_VAR_*) ;;
+				*) continue ;;
+			esac
+
+			envval=
+			eval "envval=\"\$$envname\""
+			quote_shell_variable envval "$envval"
+
+			printf 'export %s="%s"\n' "$envname" "$envval"
+		done
+		cat "$VENDORDIR/$VENDOR/chrooted-$1"
+	} |
+		mkexec "$HOSTDIR/$1.chrooted"
+}

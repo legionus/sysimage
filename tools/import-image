@@ -12,25 +12,21 @@ tag="$PROG"
 ! podman image exists "$IMAGE_SYSIMAGE:$tag" ||
 	exit 0
 
-for n in $IMAGE_PACKAGES; do
-	if [ -f "$n" ]; then
-		grep -v -e '^#' "$n" ||:
-	else
-		printf '%s\n' "$n"
-	fi
-done > "$HOSTDIR"/packages
-
 create_vendor_helper "$PROG"
 
 volumes=()
 volumes+=( -v "$HOSTDIR":/.host:z )
 volumes+=( -v "$CACHEDIR":/.host/cache:z )
 
-podman image build "${volumes[@]}" -t "$IMAGE_SYSIMAGE:$tag" -f- "$CURDIR" <<-EOF
-FROM $IMAGE_SYSIMAGE:latest
-RUN /.host/$PROG.chrooted
-EOF
+if [ -n "${IMAGE_PREFILES-}" ]; then
+	[ -d "${IMAGE_PREFILES-}" ] ||
+		fatal "IMAGE_PREFILES must be a directory"
+	volumes+=( -v "$IMAGE_PREFILES":/.host/prefiles:z )
+fi
 
+podman container run "${volumes[@]}" "$IMAGE_BASEIMAGE" "/.host/$PROG.chrooted"
+
+podman image import "$HOSTDIR/image.tar" "$IMAGE_SYSIMAGE:$tag"
 podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
 
 find "$HOSTDIR" -mindepth 1 -maxdepth 1 -exec rm -rf -- '{}' '+'

@@ -32,6 +32,8 @@ ifeq "$(VENDOR)" ""
   $(info variable VENDOR required)
 endif
 
+include $(VENDORDIR)/$(VENDOR)/vendor.mk
+
 # build-baseimage
 BASEIMAGE_PACKAGES ?=
 
@@ -89,7 +91,11 @@ build-baseimage: prepare
 	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
-build-image: build-baseimage
+import-image: build-baseimage
+	$(V)echo "processing $@ ..."
+	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
+
+build-image: build-baseimage import-image
 	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 

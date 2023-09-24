@@ -4,55 +4,5 @@
 
 set -eu
 
-mkdir -- /image
-cd /image
-
-mkdir $verbose -p -- \
-	./dev \
-	./proc \
-	./sys \
-	./var/lib/rpm \
-#
-
-mkdir $verbose -p -- ./var/lib/rpm
-rpmdb --initdb --dbpath ./var/lib/rpm
-
-# mtab is missing in setup-2.2.2-alt1
-mkdir -p ./etc
-touch ./etc/mtab
-
-# glibc-locales is too large
-mkdir -p -- ./etc/rpm
-echo '%_install_langs ${INSTALL_LANGS:-all}' >>./etc/rpm/macros
-
-# Force the treatment of scriptlet errors as expected in install checks
-mkdir -p -- ./etc/rpm
-echo '%_rpmscript_werror 1' >>./etc/rpm/macros
-
-[ ! -d /.host/prefiles ] ||
-	find /.host/prefiles -mindepth 1 -maxdepth 1 -execdir cp -arft /image -- '{}' '+'
-
-socat -u UNIX-RECV:/image/dev/log,ignoreeof GOPEN:/dev/null &
-
 apt-get -y update
-
-mkdir -p -- /.host/cache/apt/partial
-xargs -r apt-get -y \
-	-o Dir::Cache::archives=/.host/cache/apt \
-	-o RPM::RootDir=/image \
-	install < /.host/packages
-
-# sync
-while :; do
-	for proc_root in /proc/*/root; do
-		proc_root="$(readlink "$proc_root" 2>/dev/null)" ||
-			continue
-		if [ "$proc_root" = "/image" ]; then
-			sleep 1
-			continue 2
-		fi
-	done
-	break
-done
-
-tar -cf /.host/image.tar --numeric-owner --directory /image .
+xargs -r apt-get -y install < /.host/packages
