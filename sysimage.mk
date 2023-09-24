@@ -48,8 +48,6 @@ IMAGE_SCRIPTDIR ?= $(CURDIR)/image-scripts.d
 COMPRESS ?=
 IMAGENAME ?= sysimage.tar
 
-CHROOTABLE_VARIABLES = verbose
-
 IMAGE_BASEIMAGE = localhost/$(VENDOR)-baseimage
 IMAGE_SYSIMAGE  = localhost/$(VENDOR)-image
 

@@ -25,12 +25,23 @@ done > "$HOSTDIR"/packages
 	export LC_ALL=C
 	export LANG=C
 	export LANGUAGE=C
+
 	PROG="${0##*/}"
+	verbose="$verbose"
+
 	EOF
 
-	for envname in ${CHROOTABLE_VARIABLES-}; do
-		eval "envval=\"\${$envname-}\""
+	print_environ_names | sort |
+	while read -r envname; do
+		case "$envname" in
+			IMAGE_VAR_*) ;;
+			*) continue ;;
+		esac
+
+		envval=
+		eval "envval=\"\$$envname\""
 		quote_shell_variable envval "$envval"
+
 		printf 'export %s="%s"\n' "$envname" "$envval"
 	done
 
