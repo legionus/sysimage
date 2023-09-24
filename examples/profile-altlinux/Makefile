@@ -1,5 +1,7 @@
 VENDOR = altlinux
+
 IMAGE_PACKAGES = $(CURDIR)/packages
+IMAGE_PREFILES = $(CURDIR)/image-predb-files
 
 INFO_DATE        = $(shell date +%Y%m%d)
 INFO_DIST_VENDOR = ALT
@@ -9,4 +11,4 @@ COPY_TREE = $(CURDIR)/files
 
 all: build-image copy-tree run-scripts pack-image
 
-include $(CURDIR)/../sysimage.mk
+include $(CURDIR)/../../sysimage.mk
