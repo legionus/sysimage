@@ -26,7 +26,7 @@ volumes=()
 volumes+=( -v "$HOSTDIR":/.host:z )
 volumes+=( -v "$CACHEDIR":/.host/cache:z )
 
-podman image build "${volumes[@]}" -t "$IMAGE_SYSIMAGE:$tag" -f- "$CURDIR" <<-EOF
+podman image build "${volumes[@]}" --squash -t "$IMAGE_SYSIMAGE:$tag" -f- "$CURDIR" <<-EOF
 FROM $IMAGE_SYSIMAGE:latest
 RUN /.host/$PROG.chrooted
 EOF
