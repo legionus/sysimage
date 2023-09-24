@@ -1,0 +1,14 @@
+#!/bin/bash
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2023  Alexey Gladkov <gladkov.alexey@gmail.com>
+
+set -eu
+
+printf >&2 '%s: %s\n' "$PROG" "running emerge-webrsync ..."
+emerge-webrsync --quiet
+
+printf >&2 '%s: %s\n' "$PROG" "running emerge --sync ..."
+emerge --sync
+
+printf >&2 '%s: %s\n' "$PROG" "installation extra packages  ..."
+xargs -r emerge --ask=n < /.host/packages

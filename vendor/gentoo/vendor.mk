@@ -1,0 +1,2 @@
+IMAGE_VAR_ARCH    ?= amd64
+IMAGE_VAR_VARIANT ?= openrc
