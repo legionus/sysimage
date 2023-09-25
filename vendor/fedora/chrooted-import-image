@@ -1,0 +1,33 @@
+#!/bin/bash
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2023  Alexey Gladkov <gladkov.alexey@gmail.com>
+
+set -eu
+
+mkdir -- /image
+
+[ ! -d /.host/prefiles ] ||
+	find /.host/prefiles -mindepth 1 -maxdepth 1 -execdir cp -arft /image -- '{}' '+'
+
+dnf -y --releasever=${IMAGE_VAR_RELEASE_VERSION:-rawhide} \
+	--installroot=/image \
+	--nogpgcheck \
+	install $IMAGE_VAR_INIT_PACKAGES
+
+[ -f ./etc/resolv.conf ] ||
+	cp $verbose -- /etc/resolv.conf ./etc/resolv.conf
+
+# sync
+while :; do
+	for proc_root in /proc/*/root; do
+		proc_root="$(readlink "$proc_root" 2>/dev/null)" ||
+			continue
+		if [ "$proc_root" = "/image" ]; then
+			sleep 1
+			continue 2
+		fi
+	done
+	break
+done
+
+tar -cf /.host/image.tar --numeric-owner --directory /image .

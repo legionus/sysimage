@@ -1,0 +1,2 @@
+IMAGE_VAR_RELEASE_VERSION = rawhide
+IMAGE_VAR_INIT_PACKAGES = basesystem dnf bash

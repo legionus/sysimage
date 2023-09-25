@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2023  Alexey Gladkov <gladkov.alexey@gmail.com>
+
+FROM fedora
+
+ARG extra=
+ARG extra2=
+ARG verbose=
+
+RUN test -n "$extra" && \
+dnf -y install $extra ||:
+
+RUN test -d /.host/files && \
+find /.host/files/ -mindepth 1 -maxdepth 1 -exec cp $verbose -arft / -- '{}' '+' ||:
+
+RUN test -n "$extra2" && \
+dnf -y install $extra2 ||:
+
+# vim: ft=dockerfile
