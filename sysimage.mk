@@ -62,7 +62,7 @@ help:
 	@echo ""
 
 prepare:
-	@mkdir -p -- "$(HOSTDIR)" "$(CACHEDIR)"
+	@mkdir -p -- "$(HOSTDIR)" "$(CACHEDIR)/$(VENDOR)"
 	@$(TOOLSDIR)/generate-podman-storage-conf
 
 clean:

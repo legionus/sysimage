@@ -14,7 +14,7 @@ set --
 
 podman image build \
 	-v "$HOSTDIR":/.host:z \
-	-v "$CACHEDIR":/.host/cache:z \
+	-v "$CACHEDIR/$VENDOR":/.host/cache:z \
 	"$@" \
 	--build-arg verbose="$verbose" \
 	--build-arg extra="${BASEIMAGE_PACKAGES-}" \

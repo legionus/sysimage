@@ -16,7 +16,7 @@ create_vendor_helper "$PROG"
 
 volumes=()
 volumes+=( -v "$HOSTDIR":/.host:z )
-volumes+=( -v "$CACHEDIR":/.host/cache:z )
+volumes+=( -v "$CACHEDIR/$VENDOR":/.host/cache:z )
 
 if [ -n "${IMAGE_PREFILES-}" ]; then
 	[ -d "${IMAGE_PREFILES-}" ] ||

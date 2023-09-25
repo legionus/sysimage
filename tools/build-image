@@ -24,7 +24,7 @@ create_vendor_helper "$PROG"
 
 volumes=()
 volumes+=( -v "$HOSTDIR":/.host:z )
-volumes+=( -v "$CACHEDIR":/.host/cache:z )
+volumes+=( -v "$CACHEDIR/$VENDOR":/.host/cache:z )
 
 podman image build "${volumes[@]}" --squash -t "$IMAGE_SYSIMAGE:$tag" -f- "$CURDIR" <<-EOF
 FROM $IMAGE_SYSIMAGE:latest
