@@ -12,7 +12,7 @@ set --
 [ -z "${BASEIMAGE_FILES-}" ] ||
 	set -- "$@" -v "$BASEIMAGE_FILES:/.host/files:z"
 
-podman image build \
+podman image build --squash --force-rm \
 	-v "$HOSTDIR":/.host:z \
 	-v "$CACHEDIR/$VENDOR":/.host/cache:z \
 	"$@" \
