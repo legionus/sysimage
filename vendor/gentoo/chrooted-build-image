@@ -40,3 +40,5 @@ if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 	[ ! -f /.host/binrepos.conf ] ||
 		mv -f /.host/binrepos.conf /etc/portage/binrepos.conf
 fi
+
+find /var/db/repos -mindepth 1 -maxdepth 1 -exec rm -rf -- '{}' '+'

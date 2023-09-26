@@ -31,4 +31,7 @@ find /.host/files/ -mindepth 1 -maxdepth 1 -exec cp $verbose -arft / -- '{}' '+'
 RUN test -n "$extra2" && \
 emerge $verbose --ask=n -ngb $extra2 ||:
 
+RUN test -n "$extra$extra2" && \
+find /var/db/repos -mindepth 1 -maxdepth 1 -exec rm -rf -- '{}' '+' ||:
+
 # vim: ft=dockerfile
