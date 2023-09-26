@@ -20,8 +20,7 @@ subdir="${COPY_TREE#$CURDIR/}"
 [ -n "$subdir" ] && [ -d "./$subdir" ] ||
 	fatal "COPY_TREE is not a subdirectory of profile directory"
 
-podman image build --squash --force-rm \
-        -v "$HOSTDIR":/.host:z \
+podman image build --squash --force-rm "${podman_common_volumes[@]}" \
         -t "$IMAGE_SYSIMAGE:$tag" \
         -f - "$CURDIR" <<-EOF
 FROM $IMAGE_SYSIMAGE:latest

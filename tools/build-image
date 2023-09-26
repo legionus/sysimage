@@ -22,12 +22,7 @@ done > "$HOSTDIR"/packages
 
 create_vendor_helper "$PROG"
 
-volumes=()
-volumes+=( -v "$HOSTDIR":/.host:z )
-volumes+=( -v "$CACHEDIR/$VENDOR":/.host/cache:z )
-
-podman image build --squash --force-rm \
-	"${volumes[@]}" \
+podman image build --squash --force-rm "${podman_common_volumes[@]}" \
 	-t "$IMAGE_SYSIMAGE:$tag" -f- "$CURDIR" <<-EOF
 FROM $IMAGE_SYSIMAGE:latest
 RUN /.host/$PROG.chrooted

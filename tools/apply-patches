@@ -23,8 +23,7 @@ mkdir -p -- "$HOSTDIR"/patches.d
 		printf 'RUN patch -p1 --merge < "/.host/patches.d/%s"\n' "${f##*/}"
 	done
 } |
-	podman image build --squash --force-rm \
-		-v "$HOSTDIR":/.host:z \
+	podman image build --squash --force-rm "${podman_common_volumes[@]}" \
 		-t "$IMAGE_SYSIMAGE:$tag" -f-
 
 podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"

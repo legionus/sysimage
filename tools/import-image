@@ -13,18 +13,16 @@ tag="$PROG"
 	exit 0
 
 create_vendor_helper "$PROG"
-
-volumes=()
-volumes+=( -v "$HOSTDIR":/.host:z )
-volumes+=( -v "$CACHEDIR/$VENDOR":/.host/cache:z )
+set --
 
 if [ -n "${IMAGE_PREFILES-}" ]; then
 	[ -d "${IMAGE_PREFILES-}" ] ||
 		fatal "IMAGE_PREFILES must be a directory"
-	volumes+=( -v "$IMAGE_PREFILES":/.host/prefiles:z )
+	set -- -v "$IMAGE_PREFILES":/.host/prefiles:z
 fi
 
-podman container run "${volumes[@]}" "$IMAGE_BASEIMAGE" "/.host/$PROG.chrooted"
+podman container run "${podman_common_volumes[@]}" "$@" \
+	"$IMAGE_BASEIMAGE" "/.host/$PROG.chrooted"
 
 podman image import "$HOSTDIR/image.tar" "$IMAGE_SYSIMAGE:$tag"
 podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
