@@ -4,11 +4,39 @@
 
 set -eu
 
-printf >&2 '%s: %s\n' "$PROG" "running emerge-webrsync ..."
-emerge-webrsync --quiet
-
 printf >&2 '%s: %s\n' "$PROG" "running emerge --sync ..."
-emerge --sync
+emerge-webrsync
+
+set --
+if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
+	printf >&2 '%s: %s\n' "$PROG" "using binpkg cache ..."
+
+	[ ! -f /etc/portage/binrepos.conf ] ||
+		mv -f /etc/portage/binrepos.conf /.host/binrepos.conf
+
+	export PKGDIR=/.host/cache/binpkgs
+
+	mkdir -p -- "$PKGDIR"
+	:>> "$PKGDIR"/Packages
+
+	cat > /etc/portage/binrepos.conf <<-EOF
+	[sysimage]
+	sync-uri=file://$PKGDIR
+	fetchcommand=/usr/bin/curl --fail --output \${DISTDIR}/\${FILE} \${URI}
+	resumecommand=/usr/bin/curl -fail --continue-at - --output \${DISTDIR}/\${FILE} \${URI}
+	EOF
+
+	set -- "$@" --getbinpkg --buildpkg
+fi
 
 printf >&2 '%s: %s\n' "$PROG" "installation extra packages  ..."
-xargs -r emerge --ask=n < /.host/packages
+while read -r pkg; do {
+	emerge -q --ask=n "$@" "$pkg"
+} < /dev/null; done < /.host/packages
+
+if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
+	rm -f -- /etc/portage/binrepos.conf
+
+	[ ! -f /.host/binrepos.conf ] ||
+		mv -f /.host/binrepos.conf /etc/portage/binrepos.conf
+fi

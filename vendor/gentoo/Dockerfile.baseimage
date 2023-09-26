@@ -9,22 +9,26 @@ ARG extra2=
 ARG verbose=
 
 RUN \
-emerge-webrsync
+mkdir -p /etc/portage; \
+mkdir -p /.host/cache/binpkgs; \
+touch /.host/cache/binpkgs/Packages; \
+printf > /etc/portage/binrepos.conf '%s\n' \
+ '[sysimage]' \
+ 'sync-uri=file:///.host/cache/binpkgs' \
+ 'fetchcommand=/usr/bin/curl --fail --output \${DISTDIR}/\${FILE} \${URI}' \
+ 'resumecommand=/usr/bin/curl -fail --continue-at - --output \${DISTDIR}/\${FILE} \${URI}' \
+ ''
 
-RUN test -f /etc/portage/make.conf && \
-sed -i -e 's/^FEATUES=/FEATUES_DISABLED=/' \
-	/etc/portage/make.conf ||:
-
-RUN mkdir -p /etc/portage && \
-echo 'FEATURES="* -ipc-sandbox -network-sandbox -pid-sandbox"' >> /etc/portage/make.conf
+RUN test -n "$extra$extra2" && \
+emerge-webrsync ||:
 
 RUN test -n "$extra" && \
-emerge $verbose --ask=n $extra ||:
+emerge $verbose --ask=n -ngb $extra ||:
 
 RUN test -d /.host/files && \
 find /.host/files/ -mindepth 1 -maxdepth 1 -exec cp $verbose -arft / -- '{}' '+' ||:
 
 RUN test -n "$extra2" && \
-emerge $verbose --ask=n $extra2 ||:
+emerge $verbose --ask=n -ngb $extra2 ||:
 
 # vim: ft=dockerfile
