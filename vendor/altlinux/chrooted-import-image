@@ -23,7 +23,7 @@ touch ./etc/mtab
 
 # glibc-locales is too large
 mkdir -p -- ./etc/rpm
-echo '%_install_langs ${INSTALL_LANGS:-all}' >>./etc/rpm/macros
+echo "%_install_langs ${INSTALL_LANGS:-all}" >>./etc/rpm/macros
 
 # Force the treatment of scriptlet errors as expected in install checks
 mkdir -p -- ./etc/rpm
