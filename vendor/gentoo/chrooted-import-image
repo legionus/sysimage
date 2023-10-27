@@ -35,8 +35,12 @@ mkdir -- /image
 	cp /etc/resolv.conf /image/etc/resolv.conf
 
 tar -C /image \
+	--preserve-permissions --xattrs --xattrs-include='*.*' \
 	--skip-old-files \
 	--exclude 'dev/*' \
 	-xf /stage3.tar.xz
 
-tar -cf /.host/image.tar --numeric-owner --directory /image .
+tar -cf /.host/image.tar \
+	--preserve-permissions --xattrs --xattrs-include='*.*' \
+	--numeric-owner \
+	--directory /image .

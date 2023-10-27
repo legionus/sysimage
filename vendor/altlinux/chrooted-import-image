@@ -73,4 +73,7 @@ while :; do
 	break
 done
 
-tar -cf /.host/image.tar --numeric-owner --directory /image .
+tar -cf /.host/image.tar \
+	--preserve-permissions --xattrs --xattrs-include='*.*' \
+	--numeric-owner \
+	--directory /image .
