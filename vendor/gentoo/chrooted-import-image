@@ -18,7 +18,7 @@ path="$(grep -E -e "/stage3-$IMAGE_VAR_ARCH-$IMAGE_VAR_VARIANT-.*.tar.xz " lates
 url="https://distfiles.gentoo.org/releases/$IMAGE_VAR_ARCH/autobuilds/$path"
 
 printf >&2 '%s\n' "$PROG: getting $url"
-curl -o stage3.tar.xz "$url"
+curl --parallel -o stage3.tar.xz "$url"
 echo
 
 for n in passwd groups; do
@@ -31,8 +31,10 @@ mkdir -- /image
 [ ! -d /.host/prefiles ] ||
 	find /.host/prefiles -mindepth 1 -maxdepth 1 -execdir cp -varft /image -- '{}' '+'
 
-[ -f /image/etc/resolv.conf ] ||
+if [ ! -f /image/etc/resolv.conf ]; then
+	mkdir -p -- /image/etc
 	cp /etc/resolv.conf /image/etc/resolv.conf
+fi
 
 tar -C /image \
 	--preserve-permissions --xattrs --xattrs-include='*.*' \

@@ -11,7 +11,7 @@ set --
 if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 	printf >&2 '%s: %s\n' "$PROG" "using binpkg cache ..."
 
-	[ ! -f /etc/portage/binrepos.conf ] ||
+	[ ! -d /etc/portage/binrepos.conf ] ||
 		mv -f /etc/portage/binrepos.conf /.host/binrepos.conf
 
 	export PKGDIR=/.host/cache/binpkgs
@@ -19,7 +19,8 @@ if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 	mkdir -p -- "$PKGDIR"
 	:>> "$PKGDIR"/Packages
 
-	cat > /etc/portage/binrepos.conf <<-EOF
+	mkdir -p -- /etc/portage/binrepos.conf
+	cat > /etc/portage/binrepos.conf/gentoobinhost.conf <<-EOF
 	[sysimage]
 	sync-uri=file://$PKGDIR
 	fetchcommand=/usr/bin/curl --fail --output \${DISTDIR}/\${FILE} \${URI}
@@ -35,9 +36,9 @@ while read -r pkg; do {
 } < /dev/null; done < /.host/packages
 
 if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
-	rm -f -- /etc/portage/binrepos.conf
+	rm -rf -- /etc/portage/binrepos.conf
 
-	[ ! -f /.host/binrepos.conf ] ||
+	[ ! -d /.host/binrepos.conf ] ||
 		mv -f /.host/binrepos.conf /etc/portage/binrepos.conf
 fi
 

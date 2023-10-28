@@ -9,10 +9,11 @@ ARG extra2=
 ARG verbose=
 
 RUN \
-mkdir -p /etc/portage; \
+mkdir -p /etc/portage/binrepos.conf; \
 mkdir -p /.host/cache/binpkgs; \
 touch /.host/cache/binpkgs/Packages; \
-printf > /etc/portage/binrepos.conf '%s\n' \
+printf >> /etc/portage/binrepos.conf/gentoobinhost.conf '%s\n' \
+ '' \
  '[sysimage]' \
  'sync-uri=file:///.host/cache/binpkgs' \
  'fetchcommand=/usr/bin/curl --fail --output \${DISTDIR}/\${FILE} \${URI}' \
