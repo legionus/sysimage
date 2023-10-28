@@ -22,7 +22,7 @@ if [ -n "${IMAGE_PREFILES-}" ]; then
 fi
 
 podman container run "${podman_common_volumes[@]}" "$@" \
-	"$IMAGE_BASEIMAGE" "/.host/$PROG.chrooted"
+	"$IMAGE_INSTRUMENTAL" "/.host/$PROG.chrooted"
 
 podman image import "$HOSTDIR/image.tar" "$IMAGE_SYSIMAGE:$tag"
 podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"

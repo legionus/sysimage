@@ -31,7 +31,7 @@ else
 	podman container run --rm -t \
 		-v "$HOSTDIR":/.host \
 		--mount "type=image,source=$IMAGE_SYSIMAGE,destination=/.image,rw=false" \
-		"$IMAGE_BASEIMAGE" "/.host/${PACK_IMAGE##*/}"
+		"$IMAGE_INSTRUMENTAL" "/.host/${PACK_IMAGE##*/}"
 
 	files=( `cd "$HOSTDIR/out" && find . -mindepth 1 -maxdepth 1 -print` )
 

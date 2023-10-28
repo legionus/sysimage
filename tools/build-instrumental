@@ -4,20 +4,20 @@
 
 . "$HOMEDIR"/env
 
-! podman image exists "$IMAGE_BASEIMAGE:latest" ||
+! podman image exists "$IMAGE_INSTRUMENTAL:latest" ||
 	exit 0
 
 set --
 
-[ -z "${BASEIMAGE_FILES-}" ] ||
-	set -- "$@" -v "$BASEIMAGE_FILES:/.host/files:z"
+[ -z "${INSTRUMENTAL_FILES-}" ] ||
+	set -- "$@" -v "$INSTRUMENTAL_FILES:/.host/files:z"
 
 podman image build --squash --force-rm "${podman_common_volumes[@]}" "$@" \
 	--build-arg verbose="$verbose" \
-	--build-arg extra="${BASEIMAGE_PACKAGES-}" \
-	--build-arg extra2="${BASEIMAGE_PACKAGES2-}" \
-	-t "$IMAGE_BASEIMAGE:latest" \
-	-f "$VENDORDIR/$VENDOR/Dockerfile.baseimage"
+	--build-arg extra="${INSTRUMENTAL_PACKAGES-}" \
+	--build-arg extra2="${INSTRUMENTAL_PACKAGES2-}" \
+	-t "$IMAGE_INSTRUMENTAL:latest" \
+	-f "$VENDORDIR/$VENDOR/Dockerfile.instrumental"
 
 [ ! -d "$HOSTDIR"/.host/files ] ||
 	rm -rf -- "$HOSTDIR":/.host/files

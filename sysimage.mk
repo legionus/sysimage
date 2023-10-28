@@ -34,8 +34,10 @@ endif
 
 include $(VENDORDIR)/$(VENDOR)/vendor.mk
 
-# build-baseimage
-BASEIMAGE_PACKAGES ?=
+# build-instrumental
+INSTRUMENTAL_FILES ?=
+INSTRUMENTAL_PACKAGES ?=
+INSTRUMENTAL_PACKAGES2 ?=
 
 # copy-tree
 COPY_TREE ?= $(CURDIR)/files
@@ -50,7 +52,7 @@ IMAGE_SCRIPTDIR ?= $(CURDIR)/image-scripts.d
 COMPRESS ?=
 IMAGENAME ?= sysimage.tar
 
-IMAGE_BASEIMAGE = localhost/$(VENDOR)-baseimage
+IMAGE_INSTRUMENTAL = localhost/$(VENDOR)-instrumental
 IMAGE_SYSIMAGE  = localhost/$(VENDOR)-image
 
 # Rules
@@ -87,15 +89,15 @@ list-images: prepare
 list-tree: prepare
 	$(Q)source $(HOMEDIR)/env && podman image tree "$(IMAGE_SYSIMAGE)"
 
-build-baseimage: prepare
+build-instrumental: prepare
 	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
-import-image: build-baseimage
+import-image: build-instrumental
 	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
-build-image: build-baseimage import-image
+build-image: build-instrumental import-image
 	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
