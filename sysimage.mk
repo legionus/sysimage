@@ -53,6 +53,7 @@ COMPRESS ?=
 IMAGENAME ?= sysimage.tar
 
 IMAGE_INSTRUMENTAL = localhost/$(VENDOR)-instrumental
+IMAGE_BASEIMAGE = localhost/$(VENDOR)-baseimage
 IMAGE_SYSIMAGE  = localhost/$(VENDOR)-image
 
 # Rules
@@ -97,7 +98,15 @@ import-image: build-instrumental
 	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
-build-image: build-instrumental import-image
+# Create baseimage if needed. When importing an image, we create data in a
+# directory and pack it. At this stage we perform actions within this image. For
+# some vendors this step is not needed.
+build-baseimage: build-instrumental import-image
+	$(V)echo "processing $@ ..."
+	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
+
+# This stage should be named as install-packages
+build-image: import-image build-baseimage
 	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 

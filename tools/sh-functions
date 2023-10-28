@@ -52,7 +52,7 @@ mkexec()
 	chmod 755 "$1"
 }
 
-create_vendor_helper()
+create_helper()
 {
 	{
 		cat <<-'EOF'
@@ -76,7 +76,12 @@ create_vendor_helper()
 
 			printf 'export %s="%s"\n' "$envname" "$envval"
 		done
-		cat "$VENDORDIR/$VENDOR/chrooted-$1"
+		cat "$2"
 	} |
 		mkexec "$HOSTDIR/$1.chrooted"
+}
+
+create_vendor_helper()
+{
+	create_helper "$1" "$VENDORDIR/$VENDOR/chrooted-$1"
 }

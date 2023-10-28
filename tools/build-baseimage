@@ -1,0 +1,24 @@
+#!/bin/bash -efu
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2023  Alexey Gladkov <gladkov.alexey@gmail.com>
+
+. "$HOMEDIR"/env
+. "$TOOLSDIR"/sh-functions
+
+BASEIMAGE_SCRIPT="${BASEIMAGE_SCRIPT-}"
+
+[ -x "$BASEIMAGE_SCRIPT" ] ||
+	exit 0
+
+! podman image exists "$IMAGE_BASEIMAGE:latest" ||
+	exit 0
+
+create_helper "$PROG" "$BASEIMAGE_SCRIPT"
+
+podman image build --squash --force-rm "${podman_common_volumes[@]}" \
+	-t "$IMAGE_BASEIMAGE:latest" -f- "$CURDIR" <<-EOF
+FROM $IMAGE_SYSIMAGE:latest
+RUN /.host/$PROG.chrooted
+EOF
+
+find "$HOSTDIR" -mindepth 1 -maxdepth 1 -exec rm -rf -- '{}' '+'
