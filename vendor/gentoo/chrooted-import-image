@@ -31,6 +31,20 @@ mkdir -- /image
 [ ! -d /.host/prefiles ] ||
 	find /.host/prefiles -mindepth 1 -maxdepth 1 -execdir cp -varft /image -- '{}' '+'
 
+if [ -n "${IMAGE_VAR_USE_FLAGS-}" ]; then
+	if [ ! -f /image/etc/portage/make.conf ]; then
+		mkdir -p /image/etc/portage
+		:> /image/etc/portage/make.conf
+	fi
+
+	grep -qs '^[[:space:]]*USE[[:space:]]*=' /image/etc/portage/make.conf &&
+		use_append=1 ||
+		use_append=
+
+	printf >> /image/etc/portage/make.conf \
+		'USE="%s%s"\n' "${use_append:+\$USE }" "$IMAGE_VAR_USE_FLAGS"
+fi
+
 if [ ! -f /image/etc/resolv.conf ]; then
 	mkdir -p -- /image/etc
 	cp /etc/resolv.conf /image/etc/resolv.conf
