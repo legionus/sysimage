@@ -11,8 +11,10 @@ set --
 if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 	printf >&2 '%s: %s\n' "$PROG" "using binpkg cache ..."
 
-	[ ! -d /etc/portage/binrepos.conf ] ||
-		mv -f /etc/portage/binrepos.conf /.host/binrepos.conf
+	if [ -d /etc/portage/binrepos.conf ]; then
+		rm -rf -- /.host/binrepos.conf
+		mv -f -- /etc/portage/binrepos.conf /.host/binrepos.conf
+	fi
 
 	export PKGDIR=/.host/cache/binpkgs
 
