@@ -7,7 +7,9 @@ set -eu
 printf >&2 '%s: %s\n' "$PROG" "running emerge --sync ..."
 emerge-webrsync
 
-set --
+set --  -q --ask=n \
+	--autounmask=y --autounmask-write=y --autounmask-use=y --autounmask-continue=y
+
 if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 	printf >&2 '%s: %s\n' "$PROG" "using binpkg cache ..."
 
@@ -32,10 +34,41 @@ if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 	set -- "$@" --getbinpkg --buildpkg
 fi
 
+installed_deps=" "
+
+for spec in ${IMAGE_VAR_OVERLAYS:-}; do
+	name="${spec%%:*}"
+	method="${spec#*:}"
+	method="${method%%:*}"
+	url="${spec#$name:$method:}"
+
+	printf >&2 '%s: %s\n' "$PROG" "adding overlay repository $name ($url) ..."
+
+	if [ -n "${installed_deps##* $method *}" ]; then
+		pkg=
+		case "$method" in
+			git)   pkg='dev-vcs/git'    ;;
+			rsync) pkg='net-misc/rsync' ;;
+		esac
+		emerge "$@" "$pkg"
+		installed_deps="$installed_deps $method "
+	fi
+
+	mkdir -p /etc/portage/repos.conf
+	cat > "/etc/portage/repos.conf/$name.conf" <<-EOF
+	[$name]
+	location = /var/db/repos/$name
+	sync-type = $method
+	sync-uri = $url
+	auto-sync = yes
+	priority = 100
+	EOF
+
+	emaint sync -r "$name"
+done
+
 printf >&2 '%s: %s\n' "$PROG" "installation extra packages  ..."
-xargs -r emerge -q --ask=n \
-	--autounmask=y --autounmask-write=y --autounmask-use=y --autounmask-continue=y \
-	"$@" < /.host/packages
+xargs -r emerge "$@" < /.host/packages
 
 if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 	rm -rf -- /etc/portage/binrepos.conf
@@ -44,4 +77,4 @@ if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 		mv -f /.host/binrepos.conf /etc/portage/binrepos.conf
 fi
 
-find /var/db/repos -mindepth 1 -maxdepth 1 -exec rm -rf -- '{}' '+'
+find /var/cache/distfiles -mindepth 1 -maxdepth 1 -exec rm -rf -- '{}' '+'
