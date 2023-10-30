@@ -28,7 +28,7 @@ if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 	resumecommand=/usr/bin/curl -fail --continue-at - --output \${DISTDIR}/\${FILE} \${URI}
 	EOF
 
-	set -- "$@" --getbinpkg --buildpkg
+	set -- "$@" --usepkg --buildpkg
 fi
 
 export DISTDIR=/.host/cache/distfiles
