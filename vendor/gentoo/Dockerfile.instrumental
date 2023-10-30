@@ -10,7 +10,7 @@ ARG verbose=
 
 RUN \
 mkdir -p /etc/portage/binrepos.conf; \
-mkdir -p /.host/cache/binpkgs; \
+mkdir -p /.host/cache/binpkgs /.host/cache/distfiles; \
 touch /.host/cache/binpkgs/Packages; \
 printf >> /etc/portage/binrepos.conf/gentoobinhost.conf '%s\n' \
  '' \

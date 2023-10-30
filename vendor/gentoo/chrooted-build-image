@@ -4,9 +4,6 @@
 
 set -eu
 
-printf >&2 '%s: %s\n' "$PROG" "running emerge --sync ..."
-emerge-webrsync
-
 set --  -q --ask=n \
 	--autounmask=y --autounmask-write=y --autounmask-use=y --autounmask-continue=y
 
@@ -33,6 +30,9 @@ if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 
 	set -- "$@" --getbinpkg --buildpkg
 fi
+
+export DISTDIR=/.host/cache/distfiles
+mkdir -p -- "$DISTDIR"
 
 installed_deps=" "
 
@@ -63,9 +63,11 @@ for spec in ${IMAGE_VAR_OVERLAYS:-}; do
 	auto-sync = yes
 	priority = 100
 	EOF
-
 	emaint sync -r "$name"
 done
+
+printf >&2 '%s: %s\n' "$PROG" "running emerge --sync ..."
+emerge-webrsync
 
 printf >&2 '%s: %s\n' "$PROG" "installation extra packages  ..."
 xargs -r emerge "$@" < /.host/packages
@@ -76,5 +78,3 @@ if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 	[ ! -d /.host/binrepos.conf ] ||
 		mv -f /.host/binrepos.conf /etc/portage/binrepos.conf
 fi
-
-find /var/cache/distfiles -mindepth 1 -maxdepth 1 -exec rm -rf -- '{}' '+'
