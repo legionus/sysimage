@@ -74,7 +74,9 @@ clean:
 	  podman image rm -a -f && \
 	  podman system prune -a -f; \
 	fi
-	$(Q)rm -rf -- "$(WORKDIR)"
+	$(Q)[ ! -d "$(WORKDIR)" ] || \
+	  ! chmod -R u+rwx "$(WORKDIR)" || \
+	  rm -rf -- "$(WORKDIR)"
 
 clean-image:
 	$(Q)source $(HOMEDIR)/env && podman image rm -f "$(IMAGE)"
