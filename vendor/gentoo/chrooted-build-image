@@ -34,6 +34,9 @@ fi
 export DISTDIR=/.host/cache/distfiles
 mkdir -p -- "$DISTDIR"
 
+printf >&2 '%s: %s\n' "$PROG" "running emerge --sync ..."
+emerge-webrsync
+
 installed_deps=" "
 
 for spec in ${IMAGE_VAR_OVERLAYS:-}; do
@@ -65,9 +68,6 @@ for spec in ${IMAGE_VAR_OVERLAYS:-}; do
 	EOF
 	emaint sync -r "$name"
 done
-
-printf >&2 '%s: %s\n' "$PROG" "running emerge --sync ..."
-emerge-webrsync
 
 printf >&2 '%s: %s\n' "$PROG" "installation extra packages  ..."
 xargs -r emerge "$@" < /.host/packages
