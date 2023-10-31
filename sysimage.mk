@@ -81,7 +81,10 @@ clean-image:
 
 reset-image:
 	$(Q)source $(HOMEDIR)/env && \
-	  podman images --filter reference="$(IMAGE_SYSIMAGE)" --format '{{.ID}}' | \
+	  podman images --filter reference="$(IMAGE_SYSIMAGE)" --format '{{.Repository}} {{.Tag}}' | \
+	  while read -r repo tag; do \
+	    [ "$$repo" != "$(IMAGE_SYSIMAGE)" ] || echo "$$repo:$$tag"; \
+	  done | \
 	  xargs -r podman image rm -f
 
 list-images: prepare
