@@ -115,19 +115,19 @@ build-image: import-image build-baseimage
 	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
-copy-tree: build-image
+copy-tree: build-baseimage
 	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
-run-scripts: build-image
+run-scripts: build-baseimage
 	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
-apply-patches: build-image
+apply-patches: build-baseimage
 	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
-pack-image: build-image
+pack-image: build-baseimage
 	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
