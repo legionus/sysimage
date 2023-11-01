@@ -28,7 +28,14 @@ if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 	resumecommand=/usr/bin/curl -fail --continue-at - --output \${DISTDIR}/\${FILE} \${URI}
 	EOF
 
-	set -- "$@" --usepkg --buildpkg
+	# https://wiki.gentoo.org/wiki/Binary_package_guide#Maintaining_the_Packages_file
+	#
+	# If for some reason binary packages are simply deleted or copied into
+	# the packages directory, or the Packages file gets corrupted or
+	# deleted, then it must be recreated.
+	emaint binhost --fix
+
+	set -- "$@" --usepkg=y --buildpkg=y
 fi
 
 export DISTDIR=/.host/cache/distfiles
