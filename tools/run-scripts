@@ -9,8 +9,10 @@ IMAGE_SCRIPTDIR="${IMAGE_SCRIPTDIR:?IMAGE_SCRIPTDIR required}"
 
 tag="$PROG"
 
-! podman image exists "$IMAGE_SYSIMAGE:$tag" ||
+if podman image exists "$IMAGE_SYSIMAGE:$tag"; then
+	podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
 	exit 0
+fi
 
 podman image exists "$IMAGE_SYSIMAGE:latest" ||
 	fatal "image \`$IMAGE_SYSIMAGE:latest' not found"
