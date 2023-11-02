@@ -7,6 +7,9 @@ set -eu
 set --  -q --ask=n \
 	--autounmask=y --autounmask-write=y --autounmask-use=y --autounmask-continue=y
 
+[ -z "${IMAGE_VAR_EMERGE_JOBS-}"         ] || set -- "$@" --jobs "$IMAGE_VAR_EMERGE_JOBS"
+[ -z "${IMAGE_VAR_EMERGE_LOAD_AVERAGE-}" ] || set -- "$@" --load-average "$IMAGE_VAR_EMERGE_LOAD_AVERAGE"
+
 if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 	printf >&2 '%s: %s\n' "$PROG" "using binpkg cache ..."
 
