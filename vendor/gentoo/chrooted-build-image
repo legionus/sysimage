@@ -6,9 +6,9 @@ set -eu
 
 export FEATURES="-ipc-sandbox -network-sandbox -pid-sandbox"
 
-set --  -q --ask=n \
-	--newuse \
-	--autounmask=y --autounmask-write=y --autounmask-use=y --autounmask-continue=y
+automask=( --autounmask=y --autounmask-write=y --autounmask-use=y --autounmask-continue=y )
+
+set --  -q --ask=n --newuse "${automask[@]}"
 
 [ -z "${IMAGE_VAR_EMERGE_JOBS-}"         ] || set -- "$@" --jobs "$IMAGE_VAR_EMERGE_JOBS"
 [ -z "${IMAGE_VAR_EMERGE_LOAD_AVERAGE-}" ] || set -- "$@" --load-average "$IMAGE_VAR_EMERGE_LOAD_AVERAGE"
@@ -66,7 +66,11 @@ for spec in ${IMAGE_VAR_OVERLAYS:-}; do
 			git)   pkg='dev-vcs/git'    ;;
 			rsync) pkg='net-misc/rsync' ;;
 		esac
-		emerge "$@" "$pkg"
+
+		# We can’t use binpkg here because if glibc is updated, the
+		# binaries will be broken.
+		emerge -q --ask=n "${automask[@]}" "$pkg"
+
 		installed_deps="$installed_deps $method "
 	fi
 
