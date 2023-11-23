@@ -3,6 +3,7 @@
 # Copyright (C) 2023  Alexey Gladkov <gladkov.alexey@gmail.com>
 
 . "$HOMEDIR"/env
+. "$TOOLSDIR"/sh-functions
 
 ! podman image exists "$IMAGE_INSTRUMENTAL:latest" ||
 	exit 0
