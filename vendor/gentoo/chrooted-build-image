@@ -91,6 +91,15 @@ printf >&2 '%s: %s\n' "$PROG" "installation extra packages  ..."
 mkdir -p /etc/portage/sets
 cp -v /.host/packages /etc/portage/sets/sysimage
 
+if grep -E -qs \
+	-e '^(\s*)sys-apps/gentoo-systemd-integration(\s*)$' \
+	-e '^(\s*)sys-apps/systemd(\s*)$' \
+	/etc/portage/sets/sysimage;
+then
+	emerge --deselect sys-apps/openrc sys-apps/sysvinit sys-fs/udev ||:
+	emerge --oneshot virtual/udev virtual/libudev
+fi
+
 emerge "$@" @sysimage
 
 if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
