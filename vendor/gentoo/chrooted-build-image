@@ -102,6 +102,9 @@ fi
 
 emerge "$@" @sysimage
 
+[ -z "${IMAGE_VAR_REMOVE_BDEPS:-}" ] ||
+	emerge --depclean --with-bdeps=n
+
 if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 	rm -rf -- /etc/portage/binrepos.conf
 
