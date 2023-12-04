@@ -17,14 +17,16 @@ fi
 podman image exists "$IMAGE_SYSIMAGE:latest" ||
 	fatal "image \`$IMAGE_SYSIMAGE:latest' not found"
 
-subdir="${COPY_TREE#$CURDIR/}"
+tree="$(readlink -ev "$COPY_TREE")"
+[ -d "$tree" ] ||
+	fatal "COPY_TREE is not a directory"
 
-[ -n "$subdir" ] && [ -d "./$subdir" ] ||
-	fatal "COPY_TREE is not a subdirectory of profile directory"
+workdir="${tree%/*}"
+subdir="${tree##*/}"
 
 podman image build --squash --force-rm "${podman_common_volumes[@]}" \
         -t "$IMAGE_SYSIMAGE:$tag" \
-        -f - "$CURDIR" <<-EOF
+        -f - "$workdir" <<-EOF
 FROM $IMAGE_SYSIMAGE:latest
 COPY "./$subdir/" /
 EOF
