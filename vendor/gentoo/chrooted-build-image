@@ -102,6 +102,26 @@ fi
 
 emerge "$@" @sysimage
 
+kernels=(`find /usr/src -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -V`)
+if [ "${#kernels[*]}" -gt 0 ]; then
+	current=
+	[ ! -L /usr/src/linux ] ||
+		current="$(readlink /usr/src/linux)" ||:
+
+	for value in "${kernels[@]}"; do
+		[ -n "$value" ] && [ "$value" != "$current" ] ||
+			continue
+
+		printf >&2 '%s: %s\n' "$PROG" "need to rebuild kernel modules for $value ..."
+
+		ln -vnsf -- "$value" /usr/src/linux
+		emerge ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n "${automask[@]}" @module-rebuild
+	done
+
+	[ -z "$current" ] ||
+		ln -vnsf -- "$current" /usr/src/linux
+fi
+
 [ -z "${IMAGE_VAR_REMOVE_BDEPS:-}" ] ||
 	emerge --depclean --with-bdeps=n
 
