@@ -8,7 +8,7 @@ export FEATURES="-ipc-sandbox -network-sandbox -pid-sandbox"
 
 automask=( --autounmask=y --autounmask-write=y --autounmask-use=y --autounmask-continue=y )
 
-set -- ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n --newuse "${automask[@]}"
+set -- ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n --read-news=n --newuse "${automask[@]}"
 
 [ -z "${IMAGE_VAR_EMERGE_JOBS-}"         ] || set -- "$@" --jobs "$IMAGE_VAR_EMERGE_JOBS"
 [ -z "${IMAGE_VAR_EMERGE_LOAD_AVERAGE-}" ] || set -- "$@" --load-average "$IMAGE_VAR_EMERGE_LOAD_AVERAGE"
@@ -86,8 +86,6 @@ for spec in ${IMAGE_VAR_OVERLAYS:-}; do
 	emaint sync -r "$name"
 done
 
-printf >&2 '%s: %s\n' "$PROG" "installation extra packages  ..."
-
 mkdir -p /etc/portage/sets
 cp -v /.host/packages /etc/portage/sets/sysimage
 
@@ -100,7 +98,11 @@ then
 	emerge --oneshot virtual/udev virtual/libudev
 fi
 
+printf >&2 '%s: %s\n' "$PROG" "installation extra packages ..."
 emerge "$@" @sysimage
+
+printf >&2 '%s: %s\n' "$PROG" "update the @world ..."
+emerge "$@" -uDNv @world
 
 kernels=(`find /usr/src -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -V`)
 if [ "${#kernels[*]}" -gt 0 ]; then
