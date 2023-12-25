@@ -15,6 +15,7 @@ pack_outfile()
 	outfile="$OUTDIR/${IMAGENAME:-sysimage.tar}"
 
 	if [ -n "${USE_SQUASHFS-}" ]; then
+		rm -f -- "$outfile"
 		sqfstar ${SQUASHFS_ARGS-} "$outfile"
 		return
 	fi
