@@ -10,6 +10,18 @@ podman image exists "$IMAGE_SYSIMAGE:latest" ||
 
 mkdir -p -- "$OUTDIR"
 
+pack_outfile()
+{
+	outfile="$OUTDIR/${IMAGENAME:-sysimage.tar}"
+
+	if [ -n "${USE_SQUASHFS-}" ]; then
+		sqfstar ${SQUASHFS_ARGS-} "$outfile"
+		return
+	fi
+
+	${COMPRESS:-cat} > "$outfile"
+}
+
 if [ -z "${PACK_IMAGE-}" ]; then
 	verbose "exporting image \`$IMAGE_SYSIMAGE:latest' ..."
 
@@ -17,7 +29,7 @@ if [ -z "${PACK_IMAGE-}" ]; then
 
 	podman export image |
 		tar --preserve-permissions --xattrs --xattrs-include='*.*' -f- --delete .host |
-		${COMPRESS:-cat} > "$OUTDIR/${IMAGENAME:-sysimage.tar}"
+		pack_outfile
 
 	podman container rm -f image >/dev/null
 

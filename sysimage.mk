@@ -49,6 +49,8 @@ IMAGE_PATCHES ?= $(CURDIR)/image-patches.d
 IMAGE_SCRIPTDIR ?= $(CURDIR)/image-scripts.d
 
 # pack-sysimage
+USE_SQUASHFS ?=
+SQUASHFS_ARGS ?=
 COMPRESS ?=
 IMAGENAME ?= sysimage.tar
 
