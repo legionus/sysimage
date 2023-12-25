@@ -8,29 +8,29 @@ ARG extra=
 ARG extra2=
 ARG verbose=
 
-RUN \
-mkdir -p /etc/portage/binrepos.conf; \
-mkdir -p /.host/cache/binpkgs /.host/cache/distfiles; \
-touch /.host/cache/binpkgs/Packages; \
-printf >> /etc/portage/binrepos.conf/gentoobinhost.conf '%s\n' \
- '' \
- '[sysimage]' \
- 'sync-uri=file:///.host/cache/binpkgs' \
- 'fetchcommand=/usr/bin/curl --fail --output \${DISTDIR}/\${FILE} \${URI}' \
- 'resumecommand=/usr/bin/curl -fail --continue-at - --output \${DISTDIR}/\${FILE} \${URI}' \
- ''
+# RUN \
+# mkdir -p /etc/portage/binrepos.conf; \
+# mkdir -p /.host/cache/binpkgs /.host/cache/distfiles; \
+# touch /.host/cache/binpkgs/Packages; \
+# printf >> /etc/portage/binrepos.conf/gentoobinhost.conf '%s\n' \
+#  '' \
+#  '[sysimage]' \
+#  'sync-uri=file:///.host/cache/binpkgs' \
+#  'fetchcommand=/usr/bin/curl --fail --output \${DISTDIR}/\${FILE} \${URI}' \
+#  'resumecommand=/usr/bin/curl -fail --continue-at - --output \${DISTDIR}/\${FILE} \${URI}' \
+#  ''
 
 RUN test -z "$extra$extra2" || \
 emerge-webrsync
 
 RUN test -z "$extra" || \
-emerge $verbose --ask=n -ngb $extra
+emerge $verbose --ask=n $extra
 
 RUN ! test -d /.host/files || \
 find /.host/files/ -mindepth 1 -maxdepth 1 -exec cp $verbose -arft / -- '{}' '+'
 
 RUN test -z "$extra2" || \
-emerge $verbose --ask=n -ngb $extra2
+emerge $verbose --ask=n $extra2
 
 RUN test -z "$extra$extra2" || \
 find /var/db/repos -mindepth 1 -maxdepth 1 -exec rm -rf -- '{}' '+'
