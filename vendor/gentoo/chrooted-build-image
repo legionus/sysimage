@@ -67,9 +67,11 @@ for spec in ${IMAGE_VAR_OVERLAYS:-}; do
 			rsync) pkg='net-misc/rsync' ;;
 		esac
 
-		# We can’t use binpkg here because if glibc is updated, the
-		# binaries will be broken.
-		emerge ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n "${automask[@]}" "$pkg"
+		if [ -n "$pkg" ]; then
+			# We can’t use binpkg here because if glibc is updated, the
+			# binaries will be broken.
+			emerge ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n "${automask[@]}" "$pkg"
+		fi
 
 		installed_deps="$installed_deps $method "
 	fi
