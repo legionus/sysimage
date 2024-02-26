@@ -1,0 +1,18 @@
+#!/bin/bash -efu
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2024  Alexey Gladkov <gladkov.alexey@gmail.com>
+
+IMAGE="${IMAGE:?IMAGE required}"
+
+. "$HOMEDIR"/env
+. "$TOOLSDIR"/sh-functions
+
+podman image exists "$IMAGE" ||
+	fatal "image not found: $IMAGE"
+
+create_vendor_helper "$PROG"
+
+podman container run "${podman_common_volumes[@]}" --rm -ti \
+	"$IMAGE" "/.host/$PROG.chrooted"
+
+find "$HOSTDIR" -mindepth 1 -maxdepth 1 -exec rm -rf -- '{}' '+'

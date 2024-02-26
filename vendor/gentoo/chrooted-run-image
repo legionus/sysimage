@@ -1,0 +1,36 @@
+#!/bin/bash
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2024  Alexey Gladkov <gladkov.alexey@gmail.com>
+
+set -eu
+
+export FEATURES="-ipc-sandbox -network-sandbox -pid-sandbox ${IMAGE_VAR_EMERGE_IGNORE_COLLISIONS:+-collision-detect -protect-owned}"
+
+if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
+	printf >&2 '%s: %s\n' "$PROG" "using binpkg cache ..."
+
+	export PKGDIR=/.host/cache/binpkgs
+
+	mkdir -p -- "$PKGDIR"
+	:>> "$PKGDIR"/Packages
+
+	mkdir -p -- /etc/portage/binrepos.conf
+	cat > /etc/portage/binrepos.conf/gentoobinhost.conf <<-EOF
+	[sysimage]
+	sync-uri=file://$PKGDIR
+	fetchcommand=/usr/bin/curl --fail --output \${DISTDIR}/\${FILE} \${URI}
+	resumecommand=/usr/bin/curl -fail --continue-at - --output \${DISTDIR}/\${FILE} \${URI}
+	EOF
+
+	# https://wiki.gentoo.org/wiki/Binary_package_guide#Maintaining_the_Packages_file
+	#
+	# If for some reason binary packages are simply deleted or copied into
+	# the packages directory, or the Packages file gets corrupted or
+	# deleted, then it must be recreated.
+	emaint binhost --fix
+fi
+
+export DISTDIR=/.host/cache/distfiles
+mkdir -p -- "$DISTDIR"
+
+exec bash

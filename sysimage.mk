@@ -133,6 +133,10 @@ pack-image: build-baseimage
 	$(V)echo "processing $@ ..."
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
+run-image:
+	$(V)echo "processing $@ ..."
+	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
+
 run:
 	$(Q)source $(HOMEDIR)/env && podman container run --rm -ti "$(IMAGE)" /bin/bash
 
