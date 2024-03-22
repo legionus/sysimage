@@ -48,45 +48,7 @@ export DISTDIR=/.host/cache/distfiles
 mkdir -p -- "$DISTDIR"
 
 printf >&2 '%s: %s\n' "$PROG" "running emerge --sync ..."
-emerge-webrsync ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
-
-installed_deps=" "
-
-for spec in ${IMAGE_VAR_OVERLAYS:-}; do
-	name="${spec%%:*}"
-	method="${spec#*:}"
-	method="${method%%:*}"
-	url="${spec#$name:$method:}"
-
-	printf >&2 '%s: %s\n' "$PROG" "adding overlay repository $name ($url) ..."
-
-	if [ -n "${installed_deps##* $method *}" ]; then
-		pkg=
-		case "$method" in
-			git)   pkg='dev-vcs/git'    ;;
-			rsync) pkg='net-misc/rsync' ;;
-		esac
-
-		if [ -n "$pkg" ]; then
-			# We can’t use binpkg here because if glibc is updated, the
-			# binaries will be broken.
-			emerge ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n "${automask[@]}" "$pkg"
-		fi
-
-		installed_deps="$installed_deps $method "
-	fi
-
-	mkdir -p /etc/portage/repos.conf
-	cat > "/etc/portage/repos.conf/$name.conf" <<-EOF
-	[$name]
-	location = /var/db/repos/$name
-	sync-type = $method
-	sync-uri = $url
-	auto-sync = yes
-	priority = 100
-	EOF
-	emaint sync -r "$name"
-done
+emerge --sync ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
 
 mkdir -p /etc/portage/sets
 cp -v /.host/packages /etc/portage/sets/sysimage
