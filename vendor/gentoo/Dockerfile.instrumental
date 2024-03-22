@@ -24,13 +24,13 @@ RUN test -z "$extra$extra2" || \
 emerge-webrsync
 
 RUN test -z "$extra" || \
-emerge $verbose --ask=n $extra
+emerge $verbose --verbose-conflicts --ask=n $extra
 
 RUN ! test -d /.host/files || \
 find /.host/files/ -mindepth 1 -maxdepth 1 -exec cp $verbose -arft / -- '{}' '+'
 
 RUN test -z "$extra2" || \
-emerge $verbose --ask=n $extra2
+emerge $verbose --verbose-conflicts --ask=n $extra2
 
 RUN test -z "$extra$extra2" || \
 find /var/db/repos -mindepth 1 -maxdepth 1 -exec rm -rf -- '{}' '+'
