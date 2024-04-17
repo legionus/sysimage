@@ -66,7 +66,7 @@ printf >&2 '%s: %s\n' "$PROG" "installation extra packages ..."
 emerge "$@" @sysimage
 
 printf >&2 '%s: %s\n' "$PROG" "update the @world ..."
-emerge "$@" ${IMAGE_VAR_EMERGE_QUIET:+-q} -uDNv @world
+emerge "$@" ${IMAGE_VAR_EMERGE_QUIET:+-q} --update --newuse --deep @world
 
 kernels=(`find /usr/src -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -V`)
 if [ "${#kernels[*]}" -gt 0 ]; then
