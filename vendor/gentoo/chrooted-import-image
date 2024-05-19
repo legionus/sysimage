@@ -15,6 +15,11 @@ echo
 path="$(grep -E -e "/stage3-$IMAGE_VAR_ARCH-$IMAGE_VAR_VARIANT-.*.tar.xz " latest-stage3.txt |
 	cut -f1 -d\ )"
 
+if [ -z "$path" ]; then
+	printf >&2 "Error: image not found: %s\n" "stage3-$IMAGE_VAR_ARCH-$IMAGE_VAR_VARIANT-.*.tar.xz"
+	exit 1
+fi
+
 url="https://distfiles.gentoo.org/releases/$IMAGE_VAR_ARCH/autobuilds/$path"
 
 printf >&2 '%s\n' "$PROG: getting $url"
