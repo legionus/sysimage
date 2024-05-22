@@ -6,62 +6,157 @@ set -eu
 
 cd /
 
-url="https://distfiles.gentoo.org/releases/$IMAGE_VAR_ARCH/autobuilds/latest-stage3.txt"
+export ROOT=/image
+mkdir -- "$ROOT"
 
-printf >&2 '%s\n' "$PROG: getting $url"
-curl -O "$url"
-echo
-
-path="$(grep -E -e "/stage3-$IMAGE_VAR_ARCH-$IMAGE_VAR_VARIANT-.*.tar.xz " latest-stage3.txt |
-	cut -f1 -d\ )"
-
-if [ -z "$path" ]; then
-	printf >&2 "Error: image not found: %s\n" "stage3-$IMAGE_VAR_ARCH-$IMAGE_VAR_VARIANT-.*.tar.xz"
-	exit 1
-fi
-
-url="https://distfiles.gentoo.org/releases/$IMAGE_VAR_ARCH/autobuilds/$path"
-
-printf >&2 '%s\n' "$PROG: getting $url"
-curl --parallel -o stage3.tar.xz "$url"
-echo
-
-for n in passwd groups; do
-	[ ! -f "/.host/prefiles/etc/$n" ] ||
-		cp -f "/.host/prefiles/etc/$n" "/etc/$n"
-done
-
-mkdir -- /image
-
+message "Copy predefined system files"
 [ ! -d /.host/prefiles ] ||
-	find /.host/prefiles -mindepth 1 -maxdepth 1 -execdir cp -varft /image -- '{}' '+'
+	find /.host/prefiles -mindepth 1 -maxdepth 1 -execdir cp -varft "$ROOT" -- '{}' '+'
 
-if [ ! -f "/image/etc/portage/make.conf" ]; then
-	mkdir -p /image/etc/portage
-	:> /image/etc/portage/make.conf
+if [ ! -f "$ROOT"/etc/portage/make.conf ]; then
+	message "Create new $ROOT/etc/portage/make.conf"
+
+	mkdir -p -- "$ROOT"/etc/portage
+	:> "$ROOT"/etc/portage/make.conf
 
 	[ -z "${IMAGE_VAR_USE_FLAGS-}" ] ||
-		printf >> /image/etc/portage/make.conf \
+		printf >> "$ROOT"/etc/portage/make.conf \
 			'USE="%s"\n' "$IMAGE_VAR_USE_FLAGS"
 
-	printf >> /image/etc/portage/make.conf '%s\n' \
+	printf >> "$ROOT"/etc/portage/make.conf '%s\n' \
 		'BINPKG_FORMAT="gpkg"' \
 		'BINPKG_COMPRESS="zstd"' \
 		'AUTOCLEAN="yes"'
 fi
 
-if [ ! -f /image/etc/resolv.conf ]; then
-	mkdir -p -- /image/etc
-	cp /etc/resolv.conf /image/etc/resolv.conf
+if [ ! -f "$ROOT"/etc/resolv.conf ]; then
+	message "Copy system /etc/resolv.conf into $ROOT"
+
+	mkdir -p -- "$ROOT"/etc
+	cat /etc/resolv.conf > "$ROOT"/etc/resolv.conf
 fi
 
-tar -C /image \
-	--preserve-permissions --xattrs --xattrs-include='*.*' \
-	--skip-old-files \
-	--exclude 'dev/*' \
-	-xf /stage3.tar.xz
+for n in passwd group; do
+	touch "$ROOT/etc/$n"
+done
 
+if [ -d "$ROOT"/etc/portage/repos.conf ]; then
+	message "Remove custom repos /etc/portage/repos.conf/"
+	rm -vrf -- "$ROOT"/etc/portage/repos.conf
+fi
+
+message "Move repos into the new image"
+[ ! -d /var/db/repos ] ||
+	rm -rf -- /var/db/repos
+
+mkdir -p -- "$ROOT"/var/db/repos/gentoo
+ln -vsf  -- "$ROOT"/var/db/repos /var/db/repos
+
+message "Sync time!"
+emerge-webrsync -q
+
+message "Prepare new portage"
+mkdir -p -- "$ROOT"/etc/portage
+
+if [ -d /etc/portage ]; then
+	mv -- /etc/portage /etc/portage.stage3
+	cp -P -- /etc/portage.stage3/make.profile "$ROOT"/etc/portage/
+fi
+
+[ -L "$ROOT"/etc/portage/make.profile ] ||
+	ln -vs ../../var/db/repos/gentoo/profiles/default/linux "$ROOT"/etc/portage/make.profile
+
+ln -vsf -- "$ROOT"/etc/portage /etc/portage
+
+message "Change profile"
+profile="${IMAGE_VAR_PROFILE:-}"
+
+if [ -z "$profile" ]; then
+	profile_pattern="default/linux/${IMAGE_VAR_ARCH:-amd64}/[0-9][^/]+${IMAGE_VAR_VARIANT:+/$IMAGE_VAR_VARIANT}"
+
+	profile="$(
+		eselect profile list |
+			sed -r -e 's,[[:space:]]+\[[0-9]+\][[:space:]]+([^[:space:]]+) \(.*,\1,g' |
+			grep -xE "$profile_pattern" |
+			sort --version-sort |
+			tail -1
+	)"
+
+	if [ "$(printf '%s\n' "$profile" | wc -l)" != 1 ]; then
+		fatal "Error: profile not found: $profile_pattern"
+	fi
+fi
+
+eselect profile set "$profile"
+
+message "Enforce temporary settings"
+printf >> "$ROOT"/etc/portage/make.conf '%s ### by sysimage\n' \
+	"FEATURES=\"\${FEATURES} -ipc-sandbox -network-sandbox -pid-sandbox ${IMAGE_VAR_EMERGE_IGNORE_COLLISIONS:+-collision-detect -protect-owned}\""
+
+message "Create new filesystem layout"
+USE=build emerge --update --emptytree --nodeps sys-apps/baselayout
+
+message "Create set of packages"
+mkdir -p "$ROOT"/etc/portage/sets
+{
+	printf '%s\n' \
+		'app-admin/eselect'    \
+		'app-arch/bzip2'       \
+		'app-arch/gzip'        \
+		'app-arch/tar'         \
+		'app-arch/xz-utils'    \
+		'app-portage/getuto'   \
+		'app-shells/bash:0'    \
+		'dev-build/autoconf'   \
+		'dev-build/automake'   \
+		'dev-build/libtool'    \
+		'dev-build/make'       \
+		'net-misc/rsync'       \
+		'net-misc/wget'        \
+		'sys-apps/baselayout'  \
+		'sys-apps/coreutils'   \
+		'sys-apps/diffutils'   \
+		'sys-apps/file'        \
+		'sys-apps/findutils'   \
+		'sys-apps/gawk'        \
+		'sys-apps/grep'        \
+		'sys-apps/iproute2'    \
+		'sys-apps/less'        \
+		'sys-apps/man-pages'   \
+		'sys-apps/net-tools'   \
+		'sys-apps/portage'     \
+		'sys-apps/sed'         \
+		'sys-apps/shadow'      \
+		'sys-apps/util-linux'  \
+		'sys-devel/binutils'   \
+		'sys-devel/bison'      \
+		'sys-devel/flex'       \
+		'sys-devel/gcc'        \
+		'sys-devel/gettext'    \
+		'sys-devel/gnuconfig'  \
+		'sys-devel/patch'      \
+		'virtual/editor'       \
+		'virtual/libc'         \
+		'virtual/os-headers'   \
+		'virtual/pkgconfig'    \
+		#
+} |
+	sort -u |
+	tee "$ROOT"/etc/portage/sets/sysimage
+
+message "Install minimal set of packages"
+emerge \
+	${IMAGE_VAR_EMERGE_JOBS:+--jobs "$IMAGE_VAR_EMERGE_JOBS"} \
+	${IMAGE_VAR_EMERGE_LOAD_AVERAGE:+--load-average "$IMAGE_VAR_EMERGE_LOAD_AVERAGE"} \
+	--quiet --update --emptytree --with-bdeps=y \
+	@sysimage
+
+message "Cleanup"
+sed -i -e '/ ### by sysimage$/d' \
+	"$ROOT"/etc/portage/make.conf
+
+message "Pack new filesystem"
 tar -cf /.host/image.tar \
 	--preserve-permissions --xattrs --xattrs-include='*.*' \
 	--numeric-owner \
-	--directory /image .
+	--directory "$ROOT" .
