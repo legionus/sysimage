@@ -22,7 +22,7 @@ else
 endif
 
 # Current work directory
-WORKDIR := $(CURDIR)/$(WORKNAME)
+WORKDIR ?= $(CURDIR)/$(WORKNAME)
 HOSTDIR := $(WORKDIR)/host
 HOMEDIR := $(WORKDIR)/home
 CACHEDIR ?= $(WORKDIR)/cache
