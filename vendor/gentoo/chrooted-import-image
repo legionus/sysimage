@@ -6,6 +6,30 @@ set -eu
 
 cd /
 
+if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
+	printf >&2 '%s: %s\n' "$PROG" "using binpkg cache ..."
+
+	if [ -d /etc/portage/binrepos.conf ]; then
+		rm -rf -- /.host/binrepos.conf
+		mv -f -- /etc/portage/binrepos.conf /.host/binrepos.conf
+	fi
+
+	export PKGDIR=/.host/cache/binpkgs
+
+	mkdir -p -- "$PKGDIR"
+	:>> "$PKGDIR"/Packages
+
+	# https://wiki.gentoo.org/wiki/Binary_package_guide#Maintaining_the_Packages_file
+	#
+	# If for some reason binary packages are simply deleted or copied into
+	# the packages directory, or the Packages file gets corrupted or
+	# deleted, then it must be recreated.
+	emaint binhost --fix
+fi
+
+export DISTDIR=/.host/cache/distfiles
+mkdir -p -- "$DISTDIR"
+
 export ROOT=/image
 mkdir -- "$ROOT"
 
@@ -148,6 +172,7 @@ message "Install minimal set of packages"
 emerge \
 	${IMAGE_VAR_EMERGE_JOBS:+--jobs "$IMAGE_VAR_EMERGE_JOBS"} \
 	${IMAGE_VAR_EMERGE_LOAD_AVERAGE:+--load-average "$IMAGE_VAR_EMERGE_LOAD_AVERAGE"} \
+	${IMAGE_VAR_CACHE_BINPKGS:+--usepkg=y} \
 	--quiet --update --emptytree --with-bdeps=y \
 	@sysimage
 

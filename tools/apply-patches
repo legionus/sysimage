@@ -8,18 +8,19 @@ IMAGE_PATCHES="${IMAGE_PATCHES:?IMAGE_PATCHES required}"
 . "$TOOLSDIR"/sh-functions
 
 tag="$PROG"
+latest="latest"
 
 if podman image exists "$IMAGE_SYSIMAGE:$tag"; then
-	podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
+	podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:$latest"
 	exit 0
 fi
 
-podman image exists "$IMAGE_SYSIMAGE:latest" ||
-	fatal "image \`$IMAGE_SYSIMAGE:latest' not found"
+podman image exists "$IMAGE_SYSIMAGE:$latest" ||
+	fatal "image \`$IMAGE_SYSIMAGE:$latest' not found"
 
 mkdir -p -- "$HOSTDIR"/patches.d
 {
-	printf 'FROM %s\n' "$IMAGE_SYSIMAGE:latest"
+	printf 'FROM %s\n' "$IMAGE_SYSIMAGE:$latest"
 	for f in "$IMAGE_PATCHES"/*.patch; do
 		cp -f -- "$f" "$HOSTDIR"/patches.d/
 		printf 'RUN patch -p1 --merge < "/.host/patches.d/%s"\n' "${f##*/}"
@@ -28,6 +29,6 @@ mkdir -p -- "$HOSTDIR"/patches.d
 	podman image build --squash --force-rm "${podman_common_volumes[@]}" \
 		-t "$IMAGE_SYSIMAGE:$tag" -f-
 
-podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
+podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:$latest"
 
 find "$HOSTDIR" -mindepth 1 -maxdepth 1 -exec rm -rf -- '{}' '+'

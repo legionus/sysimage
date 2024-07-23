@@ -8,18 +8,19 @@ IMAGE_SCRIPTDIR="${IMAGE_SCRIPTDIR:?IMAGE_SCRIPTDIR required}"
 . "$TOOLSDIR"/sh-functions
 
 tag="$PROG"
+latest="latest"
 
 if podman image exists "$IMAGE_SYSIMAGE:$tag"; then
-	podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
+	podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:$latest"
 	exit 0
 fi
 
-podman image exists "$IMAGE_SYSIMAGE:latest" ||
-	fatal "image \`$IMAGE_SYSIMAGE:latest' not found"
+podman image exists "$IMAGE_SYSIMAGE:$latest" ||
+	fatal "image \`$IMAGE_SYSIMAGE:$latest' not found"
 
 mkdir -p -- "$HOSTDIR"/scripts.d
 {
-	printf 'FROM %s\n' "$IMAGE_SYSIMAGE:latest"
+	printf 'FROM %s\n' "$IMAGE_SYSIMAGE:$latest"
 	printf 'ENV verbose="%s"\n' "$verbose"
 
 	print_environ_names | sort |
@@ -52,6 +53,6 @@ mkdir -p -- "$HOSTDIR"/scripts.d
 		"${podman_common_volumes[@]}" \
 		-t "$IMAGE_SYSIMAGE:$tag" -f-
 
-podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
+podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:$latest"
 
 find "$HOSTDIR" -mindepth 1 -maxdepth 1 -exec rm -rf -- '{}' '+'

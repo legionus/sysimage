@@ -8,14 +8,15 @@ COPY_TREE="${COPY_TREE:?COPY_TREE required}"
 . "$TOOLSDIR"/sh-functions
 
 tag="$PROG"
+latest="latest"
 
 if podman image exists "$IMAGE_SYSIMAGE:$tag"; then
-	podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
+	podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:$latest"
 	exit 0
 fi
 
-podman image exists "$IMAGE_SYSIMAGE:latest" ||
-	fatal "image \`$IMAGE_SYSIMAGE:latest' not found"
+podman image exists "$IMAGE_SYSIMAGE:$latest" ||
+	fatal "image \`$IMAGE_SYSIMAGE:$latest' not found"
 
 tree="$(readlink -ev "$COPY_TREE")"
 [ -d "$tree" ] ||
@@ -27,10 +28,10 @@ subdir="${tree##*/}"
 podman image build --squash --force-rm "${podman_common_volumes[@]}" \
         -t "$IMAGE_SYSIMAGE:$tag" \
         -f - "$workdir" <<-EOF
-FROM $IMAGE_SYSIMAGE:latest
+FROM $IMAGE_SYSIMAGE:$latest
 COPY "./$subdir/" /
 EOF
 
-podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:latest"
+podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:$latest"
 
 find "$HOSTDIR" -mindepth 1 -maxdepth 1 -exec rm -rf -- '{}' '+'
