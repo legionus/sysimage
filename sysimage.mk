@@ -83,6 +83,7 @@ clean:
 	  rm -rf -- "$(WORKDIR)"
 
 clean-image:
+	@: $${IMAGE?}
 	$(Q)source $(HOMEDIR)/env && podman image rm -f "$(IMAGE)"
 
 reset-image:
@@ -94,7 +95,8 @@ list-images: prepare
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
 list-tree: prepare
-	$(Q)source $(HOMEDIR)/env && podman image tree "$(IMAGE_SYSIMAGE)"
+	@: $${IMAGE?}
+	$(Q)source $(HOMEDIR)/env && podman image tree "$(IMAGE)"
 
 build-instrumental: prepare
 	$(V)echo "processing $@ ..."
@@ -137,5 +139,6 @@ run-image:
 	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
 run:
+	@: $${IMAGE?}
 	$(Q)source $(HOMEDIR)/env && podman container run --rm -ti "$(IMAGE)" /bin/bash
 
