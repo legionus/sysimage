@@ -58,6 +58,8 @@ IMAGE_INSTRUMENTAL = localhost/$(VENDOR)-instrumental
 IMAGE_BASEIMAGE = localhost/$(VENDOR)-baseimage
 IMAGE_SYSIMAGE  = localhost/$(VENDOR)-image
 
+SYSIMAGE_TAG_PREFIX ?=
+
 # Rules
 help:
 	@echo "This makefile is designed to generate an image of the root filesystem of"
@@ -84,12 +86,8 @@ clean-image:
 	$(Q)source $(HOMEDIR)/env && podman image rm -f "$(IMAGE)"
 
 reset-image:
-	$(Q)source $(HOMEDIR)/env && \
-	  podman images --filter reference="$(IMAGE_SYSIMAGE)" --format '{{.Repository}} {{.Tag}}' | \
-	  while read -r repo tag; do \
-	    [ "$$repo" != "$(IMAGE_SYSIMAGE)" ] || echo "$$repo:$$tag"; \
-	  done | \
-	  xargs -r podman image rm -f
+	$(V)echo "processing $@ ..."
+	@env PATH="$(TOOLSDIR):$$PATH" $(TOOLSDIR)/$@
 
 list-images: prepare
 	$(Q)source $(HOMEDIR)/env && podman images

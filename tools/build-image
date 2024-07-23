@@ -7,8 +7,8 @@
 
 IMAGE_PACKAGES="${IMAGE_PACKAGES:?IMAGE_PACKAGES variable required}"
 
-tag="$PROG"
-latest="latest"
+tag="${SYSIMAGE_TAG_PREFIX:+$SYSIMAGE_TAG_PREFIX-}$PROG"
+latest="${SYSIMAGE_TAG_PREFIX:+$SYSIMAGE_TAG_PREFIX-}latest"
 
 if podman image exists "$IMAGE_SYSIMAGE:$tag"; then
 	podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:$latest"

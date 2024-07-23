@@ -10,7 +10,7 @@ BASEIMAGE_SCRIPT="${BASEIMAGE_SCRIPT-}"
 [ -x "$BASEIMAGE_SCRIPT" ] ||
 	exit 0
 
-latest="latest"
+latest="${SYSIMAGE_TAG_PREFIX:+$SYSIMAGE_TAG_PREFIX-}latest"
 
 ! podman image exists "$IMAGE_BASEIMAGE:latest" ||
 	exit 0

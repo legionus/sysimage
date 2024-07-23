@@ -5,7 +5,7 @@
 . "$HOMEDIR"/env
 . "$TOOLSDIR"/sh-functions
 
-latest="latest"
+latest="${SYSIMAGE_TAG_PREFIX:+$SYSIMAGE_TAG_PREFIX-}latest"
 
 podman image exists "$IMAGE_SYSIMAGE:$latest" ||
 	fatal "image \`$IMAGE_SYSIMAGE:$latest' not found"

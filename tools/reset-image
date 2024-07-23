@@ -1,0 +1,21 @@
+#!/bin/bash -efu
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2024  Alexey Gladkov <gladkov.alexey@gmail.com>
+
+. "$HOMEDIR"/env
+. "$TOOLSDIR"/sh-functions
+
+podman images \
+	--filter reference="$IMAGE_SYSIMAGE" \
+	--format '{{.Repository}} {{.Tag}}' |
+while read -r repo tag; do
+	[ "$repo" = "$IMAGE_SYSIMAGE" ] ||
+		continue
+
+	[ -z "$SYSIMAGE_TAG_PREFIX" ] || [ -z "${tag##$SYSIMAGE_TAG_PREFIX-*}" ] ||
+		continue
+
+	message "removing '$repo:$tag' ..."
+
+	podman image rm -f "$repo:$tag"
+done
