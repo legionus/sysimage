@@ -14,7 +14,7 @@ set -- ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n --read-news=n --newuse --verbose-co
 [ -z "${IMAGE_VAR_EMERGE_LOAD_AVERAGE-}" ] || set -- "$@" --load-average "$IMAGE_VAR_EMERGE_LOAD_AVERAGE"
 
 if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
-	printf >&2 '%s: %s\n' "$PROG" "using binpkg cache ..."
+	message "using binpkg cache ..."
 
 	if [ -d /etc/portage/binrepos.conf ]; then
 		rm -rf -- /.host/binrepos.conf
@@ -47,7 +47,7 @@ fi
 export DISTDIR=/.host/cache/distfiles
 mkdir -p -- "$DISTDIR"
 
-printf >&2 '%s: %s\n' "$PROG" "running emerge --sync ..."
+message "running emerge --sync ..."
 emerge --sync ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
 
 mkdir -p /etc/portage/sets
@@ -62,10 +62,10 @@ then
 	emerge --oneshot virtual/udev virtual/libudev
 fi
 
-printf >&2 '%s: %s\n' "$PROG" "installation extra packages ..."
+message "installation extra packages ..."
 emerge "$@" @sysimage
 
-printf >&2 '%s: %s\n' "$PROG" "update the @world ..."
+message "update the @world ..."
 emerge "$@" ${IMAGE_VAR_EMERGE_QUIET:+-q} --update --newuse --deep @world
 
 kernels=(`find /usr/src -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -V`)
@@ -75,7 +75,7 @@ if [ "${#kernels[*]}" -gt 0 ]; then
 		current="$(readlink /usr/src/linux)" ||:
 
 	for value in "${kernels[@]}"; do
-		printf >&2 '%s: %s\n' "$PROG" "need to rebuild kernel modules for $value ..."
+		message "need to rebuild kernel modules for $value ..."
 
 		ln -vnsf -- "$value" /usr/src/linux
 		emerge ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n "${automask[@]}" @module-rebuild

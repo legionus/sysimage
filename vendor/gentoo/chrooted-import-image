@@ -7,7 +7,7 @@ set -eu
 cd /
 
 if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
-	printf >&2 '%s: %s\n' "$PROG" "using binpkg cache ..."
+	message "using binpkg cache ..."
 
 	if [ -d /etc/portage/binrepos.conf ]; then
 		rm -rf -- /.host/binrepos.conf
