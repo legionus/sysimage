@@ -63,6 +63,12 @@ create_helper()
 		export PROG="${0##*/}"
 		export verbose="$verbose"
 
+		EOF
+		cat <<-EOF
+		export TAG_PREFIX="${SYSIMAGE_TAG_PREFIX-}"
+
+		EOF
+		cat <<-'EOF'
 		message() {
 		    printf >&2 '%s\n' "$PROG: $*"
 		}
