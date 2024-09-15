@@ -1,0 +1,23 @@
+#!/bin/bash
+
+export NO_COLOR=1
+
+setup_logs()
+{
+	[ -d /.host/cache/logs ] ||
+		return 0
+
+	message "setup logs ..."
+
+	#
+	# https://wiki.gentoo.org/wiki/Portage_log
+	#
+	export FEATURES="${FEATURES-} split-elog split-log binpkg-logs"
+
+	export PORTAGE_ELOG_CLASSES="info warn error log qa"
+	export PORTAGE_ELOG_SYSTEM="echo:error save_summary:info,warn,error,log,qa"
+
+	export PORTAGE_LOGDIR="/.host/cache/logs/${TAG_PREFIX:+$TAG_PREFIX}/${PROG-}"
+
+	mkdir -p -- "$PORTAGE_LOGDIR"
+}

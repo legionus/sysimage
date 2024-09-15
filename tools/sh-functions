@@ -72,6 +72,10 @@ create_helper()
 		    exit 1
 		}
 		EOF
+
+		[ ! -f "$VENDORDIR/$VENDOR/chrooted-sh-functions" ] ||
+			cat "$VENDORDIR/$VENDOR/chrooted-sh-functions"
+
 		print_environ_names | sort |
 		while read -r envname; do
 			case "$envname" in

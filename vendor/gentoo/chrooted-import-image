@@ -6,6 +6,8 @@ set -eu
 
 cd /
 
+setup_logs
+
 if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 	message "using binpkg cache ..."
 

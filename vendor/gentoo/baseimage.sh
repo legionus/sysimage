@@ -6,6 +6,8 @@ export PKGDIR=/.host/cache/binpkgs
 export DISTDIR=/.host/cache/distfiles
 export FEATURES="-ipc-sandbox -network-sandbox -pid-sandbox"
 
+seup_logs
+
 emerge-webrsync -q
 
 [ ! -d "$PKGDIR" ] ||
