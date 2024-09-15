@@ -2,25 +2,22 @@
 
 set -x
 
-export PKGDIR=/.host/cache/binpkgs
-export DISTDIR=/.host/cache/distfiles
 export FEATURES="-ipc-sandbox -network-sandbox -pid-sandbox"
 
 seup_logs
+setup_distfiles
+setup_binpkgs
 
 emerge-webrsync -q
 
-[ ! -d "$PKGDIR" ] ||
-	emaint binhost --fix
-
 emerge \
-	--quiet --ask=n --emptytree \
-	--update --usepkg=y --buildpkg=y \
-	--newuse --rebuilt-binaries=y --binpkg-respect-use=y \
+	${IMAGE_VAR_CACHE_BINPKGS:+--usepkg=y --buildpkg=y --binpkg-respect-use=y --rebuilt-binaries=y} \
+	--quiet --ask=n --emptytree --update --newuse \
 	@world
 
 # https://wiki.gentoo.org/wiki/Binary_package_guide
 [ -z "${IMAGE_VAR_REMOVE_BDEPS-}" ] ||
 	emerge --quiet --ask=n --depclean --with-bdeps=n
 
+restore_binpkgs
 cleanup_portage /

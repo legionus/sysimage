@@ -12,42 +12,11 @@ set -- ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n --read-news=n --newuse --verbose-co
 
 [ -z "${IMAGE_VAR_EMERGE_JOBS-}"         ] || set -- "$@" --jobs "$IMAGE_VAR_EMERGE_JOBS"
 [ -z "${IMAGE_VAR_EMERGE_LOAD_AVERAGE-}" ] || set -- "$@" --load-average "$IMAGE_VAR_EMERGE_LOAD_AVERAGE"
+[ -z "${IMAGE_VAR_CACHE_BINPKGS-}"       ] || set -- "$@" --usepkg=y --buildpkg=y
 
 setup_logs
-
-if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
-	message "using binpkg cache ..."
-
-	if [ -d /etc/portage/binrepos.conf ]; then
-		rm -rf -- /.host/binrepos.conf
-		mv -f -- /etc/portage/binrepos.conf /.host/binrepos.conf
-	fi
-
-	export PKGDIR=/.host/cache/binpkgs
-
-	mkdir -p -- "$PKGDIR"
-	:>> "$PKGDIR"/Packages
-
-	mkdir -p -- /etc/portage/binrepos.conf
-	cat > /etc/portage/binrepos.conf/gentoobinhost.conf <<-EOF
-	[sysimage]
-	sync-uri=file://$PKGDIR
-	fetchcommand=/usr/bin/curl --fail --output \${DISTDIR}/\${FILE} \${URI}
-	resumecommand=/usr/bin/curl -fail --continue-at - --output \${DISTDIR}/\${FILE} \${URI}
-	EOF
-
-	# https://wiki.gentoo.org/wiki/Binary_package_guide#Maintaining_the_Packages_file
-	#
-	# If for some reason binary packages are simply deleted or copied into
-	# the packages directory, or the Packages file gets corrupted or
-	# deleted, then it must be recreated.
-	emaint binhost --fix
-
-	set -- "$@" --usepkg=y --buildpkg=y
-fi
-
-export DISTDIR=/.host/cache/distfiles
-mkdir -p -- "$DISTDIR"
+setup_distfiles
+setup_binpkgs
 
 message "running emerge --sync ..."
 emerge --sync ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
@@ -90,11 +59,5 @@ fi
 [ -z "${IMAGE_VAR_REMOVE_BDEPS:-}" ] ||
 	emerge --depclean --with-bdeps=n
 
-if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
-	rm -rf -- /etc/portage/binrepos.conf
-
-	[ ! -d /.host/binrepos.conf ] ||
-		mv -f /.host/binrepos.conf /etc/portage/binrepos.conf
-fi
-
+restore_binpkgs
 cleanup_portage /
