@@ -182,6 +182,8 @@ message "Cleanup"
 sed -i -e '/ ### by sysimage$/d' \
 	"$ROOT"/etc/portage/make.conf
 
+cleanup_portage "$ROOT"
+
 message "Pack new filesystem"
 tar -cf /.host/image.tar \
 	--preserve-permissions --xattrs --xattrs-include='*.*' \

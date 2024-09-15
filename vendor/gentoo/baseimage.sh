@@ -22,3 +22,5 @@ emerge \
 # https://wiki.gentoo.org/wiki/Binary_package_guide
 [ -z "${IMAGE_VAR_REMOVE_BDEPS-}" ] ||
 	emerge --quiet --ask=n --depclean --with-bdeps=n
+
+cleanup_portage /

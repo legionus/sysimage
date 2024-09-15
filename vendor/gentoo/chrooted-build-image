@@ -96,3 +96,5 @@ if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 	[ ! -d /.host/binrepos.conf ] ||
 		mv -f /.host/binrepos.conf /etc/portage/binrepos.conf
 fi
+
+cleanup_portage /

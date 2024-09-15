@@ -21,3 +21,14 @@ setup_logs()
 
 	mkdir -p -- "$PORTAGE_LOGDIR"
 }
+
+#
+# https://wiki.gentoo.org/wiki/Knowledge_Base:Freeing_disk_space
+#
+cleanup_portage()
+{
+	local rootdir="$1"
+
+	[ ! -d "$rootdir"/var/tmp/portage ] ||
+		find "$rootdir"/var/tmp/portage -mindepth 1 -delete ||:
+}
