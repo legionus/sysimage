@@ -77,6 +77,12 @@ create_helper()
 		    message "$*"
 		    exit 1
 		}
+
+		run_with_message() {
+		    message "$1"
+		    shift
+		    "$@"
+		}
 		EOF
 
 		[ ! -f "$VENDORDIR/$VENDOR/chrooted-sh-functions" ] ||

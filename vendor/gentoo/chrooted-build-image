@@ -18,7 +18,7 @@ setup_logs
 setup_distfiles
 setup_binpkgs
 
-message "running emerge --sync ..."
+run_with_message "sync gentoo repos..." \
 emerge --sync ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
 
 mkdir -p /etc/portage/sets
@@ -29,14 +29,15 @@ if grep -E -qs \
 	-e '^(\s*)sys-apps/systemd(\s*)$' \
 	/etc/portage/sets/sysimage;
 then
+	run_with_message "unselect previous system init..." \
 	emerge --deselect sys-apps/openrc sys-apps/sysvinit sys-fs/udev ||:
 	emerge --oneshot virtual/udev virtual/libudev
 fi
 
-message "installation extra packages ..."
+run_with_message "installation extra packages ..." \
 emerge "$@" @sysimage
 
-message "update the @world ..."
+run_with_message "update the @world ..." \
 emerge "$@" ${IMAGE_VAR_EMERGE_QUIET:+-q} --update --newuse --deep @world
 
 kernels=(`find /usr/src -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -V`)
@@ -46,9 +47,9 @@ if [ "${#kernels[*]}" -gt 0 ]; then
 		current="$(readlink /usr/src/linux)" ||:
 
 	for value in "${kernels[@]}"; do
-		message "need to rebuild kernel modules for $value ..."
-
 		ln -vnsf -- "$value" /usr/src/linux
+
+		run_with_message "need to rebuild kernel modules for $value ..." \
 		emerge ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n "${automask[@]}" @module-rebuild
 	done
 
@@ -57,6 +58,7 @@ if [ "${#kernels[*]}" -gt 0 ]; then
 fi
 
 [ -z "${IMAGE_VAR_REMOVE_BDEPS:-}" ] ||
+	run_with_message "remove build deps..." \
 	emerge --depclean --with-bdeps=n
 
 restore_binpkgs

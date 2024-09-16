@@ -13,8 +13,8 @@ setup_binpkgs
 export ROOT=/image
 mkdir -- "$ROOT"
 
-message "Copy predefined system files"
 [ ! -d /.host/prefiles ] ||
+	run_with_message "Copy predefined system files" \
 	find /.host/prefiles -mindepth 1 -maxdepth 1 -execdir cp -varft "$ROOT" -- '{}' '+'
 
 if [ ! -f "$ROOT"/etc/portage/make.conf ]; then
@@ -45,7 +45,7 @@ for n in passwd group; do
 done
 
 if [ -d "$ROOT"/etc/portage/repos.conf ]; then
-	message "Remove custom repos /etc/portage/repos.conf/"
+	run_with_message "Remove custom repos /etc/portage/repos.conf/" \
 	rm -vrf -- "$ROOT"/etc/portage/repos.conf
 fi
 
@@ -97,8 +97,9 @@ message "Enforce temporary settings"
 printf >> "$ROOT"/etc/portage/make.conf '%s ### by sysimage\n' \
 	"FEATURES=\"\${FEATURES} -ipc-sandbox -network-sandbox -pid-sandbox ${IMAGE_VAR_EMERGE_IGNORE_COLLISIONS:+-collision-detect -protect-owned}\""
 
-message "Create new filesystem layout"
-USE=build emerge --update --emptytree --nodeps sys-apps/baselayout
+USE=build \
+	run_with_message "Create new filesystem layout" \
+	emerge --update --emptytree --nodeps sys-apps/baselayout
 
 message "Create set of packages"
 mkdir -p "$ROOT"/etc/portage/sets
@@ -148,7 +149,7 @@ mkdir -p "$ROOT"/etc/portage/sets
 	sort -u |
 	tee "$ROOT"/etc/portage/sets/sysimage
 
-message "Install minimal set of packages"
+run_with_message "Install minimal set of packages" \
 emerge \
 	${IMAGE_VAR_EMERGE_JOBS:+--jobs "$IMAGE_VAR_EMERGE_JOBS"} \
 	${IMAGE_VAR_EMERGE_LOAD_AVERAGE:+--load-average "$IMAGE_VAR_EMERGE_LOAD_AVERAGE"} \
@@ -162,7 +163,7 @@ sed -i -e '/ ### by sysimage$/d' \
 
 cleanup_portage "$ROOT"
 
-message "Pack new filesystem"
+run_with_message "Pack new filesystem" \
 tar -cf /.host/image.tar \
 	--preserve-permissions --xattrs --xattrs-include='*.*' \
 	--numeric-owner \
