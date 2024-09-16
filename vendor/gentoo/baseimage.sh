@@ -21,5 +21,5 @@ emerge \
 	run_with_message "remove build deps ..." \
 	emerge --quiet --ask=n --depclean --with-bdeps=n
 
-restore_binpkgs
+remove_binpkgs_conf
 cleanup_portage /

@@ -2,6 +2,12 @@
 
 export NO_COLOR=1
 
+cat_file()
+{
+	mkdir -p -- "${1%/*}"
+	cat > "$1"
+}
+
 setup_logs()
 {
 	[ -d /.host/cache/logs ] ||
@@ -34,19 +40,15 @@ setup_binpkgs()
 		return 0
 
 	message "using binpkg cache ..."
-
-	if [ -d /etc/portage/binrepos.conf ]; then
-		rm -rf -- /.host/binrepos.conf
-		mv -f -- /etc/portage/binrepos.conf /.host/binrepos.conf
-	fi
-
 	export PKGDIR=/.host/cache/binpkgs
 
 	mkdir -p -- "$PKGDIR"
 	:>> "$PKGDIR"/Packages
 
-	mkdir -p -- /etc/portage/binrepos.conf
-	cat > /etc/portage/binrepos.conf/gentoobinhost.conf <<-EOF
+	# Drop all previous binpkgs sources
+	rm -rf -- /etc/portage/binrepos.conf
+
+	cat_file /etc/portage/binrepos.conf/sysimage.conf <<-EOF
 	[sysimage]
 	sync-uri=file://$PKGDIR
 	fetchcommand=/usr/bin/curl --fail --output \${DISTDIR}/\${FILE} \${URI}
@@ -61,15 +63,9 @@ setup_binpkgs()
 	emaint binhost --fix
 }
 
-restore_binpkgs()
+remove_binpkgs_conf()
 {
-	[ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ] ||
-		return 0
-
-	rm -rf -- /etc/portage/binrepos.conf
-
-	[ ! -d /.host/binrepos.conf ] ||
-		mv -f /.host/binrepos.conf /etc/portage/binrepos.conf
+       rm -rf -- /etc/portage/binrepos.conf
 }
 
 #

@@ -21,8 +21,7 @@ setup_binpkgs
 run_with_message "sync gentoo repos..." \
 emerge --sync ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
 
-mkdir -p /etc/portage/sets
-cp -v /.host/packages /etc/portage/sets/sysimage
+cat_file /etc/portage/sets/sysimage < /.host/packages
 
 if grep -E -qs \
 	-e '^(\s*)sys-apps/gentoo-systemd-integration(\s*)$' \
@@ -61,5 +60,5 @@ fi
 	run_with_message "remove build deps..." \
 	emerge --depclean --with-bdeps=n
 
-restore_binpkgs
+remove_binpkgs_conf
 cleanup_portage /
