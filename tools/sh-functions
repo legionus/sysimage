@@ -81,6 +81,8 @@ create_helper()
 		run_with_message() {
 		    message "$1"
 		    shift
+		    [ -z "${verbose-}" ] ||
+		        message "RUN: $*"
 		    "$@"
 		}
 		EOF
