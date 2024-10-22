@@ -31,27 +31,36 @@ then
 	emerge --oneshot virtual/udev virtual/libudev
 fi
 
+[ -z "${IMAGE_VAR_SKIP_KERNEL:-}" ] ||
+	export SKIP_KERNEL_CHECK=1
+
 run_with_message "installation extra packages ..." \
 emerge "$@" --deep --with-bdeps=y @sysimage
 
 run_with_message "update the @world ..." \
 emerge "$@" ${IMAGE_VAR_EMERGE_QUIET:+-q} --update --newuse --deep --with-bdeps=y @world
 
-kernels=(`find /usr/src -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -V`)
-if [ "${#kernels[*]}" -gt 0 ]; then
-	current=
-	[ ! -L /usr/src/linux ] ||
-		current="$(readlink /usr/src/linux)" ||:
+if [ -z "${IMAGE_VAR_SKIP_KERNEL:-}" ]; then
+	kernels=(`find /usr/src -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -V`)
 
-	for value in "${kernels[@]}"; do
-		ln -vnsf -- "$value" /usr/src/linux
+	if [ "${#kernels[*]}" -gt 0 ]; then
+		current=
+		[ ! -L /usr/src/linux ] ||
+			current="$(readlink /usr/src/linux)" ||:
 
-		run_with_message "need to rebuild kernel modules for $value ..." \
-		emerge ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n "${automask[@]}" @module-rebuild
-	done
+		for value in "${kernels[@]}"; do
+			[ -f "/usr/src/$value/.config" ] ||
+				continue
 
-	[ -z "$current" ] ||
-		ln -vnsf -- "$current" /usr/src/linux
+			ln -vnsf -- "$value" /usr/src/linux
+
+			run_with_message "need to rebuild kernel modules for $value ..." \
+			emerge ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n "${automask[@]}" @module-rebuild
+		done
+
+		[ -z "$current" ] ||
+			ln -vnsf -- "$current" /usr/src/linux
+	fi
 fi
 
 [ -z "${IMAGE_VAR_REMOVE_BDEPS:-}" ] ||
