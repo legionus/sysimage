@@ -12,7 +12,7 @@ set -- ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n --read-news=n --newuse --verbose-co
 
 [ -z "${IMAGE_VAR_EMERGE_JOBS-}"         ] || set -- "$@" --jobs "$IMAGE_VAR_EMERGE_JOBS"
 [ -z "${IMAGE_VAR_EMERGE_LOAD_AVERAGE-}" ] || set -- "$@" --load-average "$IMAGE_VAR_EMERGE_LOAD_AVERAGE"
-[ -z "${IMAGE_VAR_CACHE_BINPKGS-}"       ] || set -- "$@" --usepkg=y --buildpkg=y
+[ -z "${IMAGE_VAR_CACHE_BINPKGS-}"       ] || set -- "$@" --usepkg=y --buildpkg=y --binpkg-respect-use=y --rebuilt-binaries=y
 
 setup_logs
 setup_distfiles
@@ -34,10 +34,10 @@ then
 fi
 
 run_with_message "installation extra packages ..." \
-emerge "$@" @sysimage
+emerge "$@" --deep --with-bdeps=y @sysimage
 
 run_with_message "update the @world ..." \
-emerge "$@" ${IMAGE_VAR_EMERGE_QUIET:+-q} --update --newuse --deep @world
+emerge "$@" ${IMAGE_VAR_EMERGE_QUIET:+-q} --update --newuse --deep --with-bdeps=y @world
 
 kernels=(`find /usr/src -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -V`)
 if [ "${#kernels[*]}" -gt 0 ]; then
