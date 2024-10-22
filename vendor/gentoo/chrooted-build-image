@@ -17,9 +17,7 @@ set -- ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n --read-news=n --newuse --verbose-co
 setup_logs
 setup_distfiles
 setup_binpkgs
-
-run_with_message "sync gentoo repos..." \
-emerge --sync ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
+setup_package_db ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
 
 cat_file /etc/portage/sets/sysimage < /.host/packages
 

@@ -28,6 +28,28 @@ setup_logs()
 	mkdir -p -- "$PORTAGE_LOGDIR"
 }
 
+setup_package_db()
+{
+	message "sync gentoo repos..."
+
+	! emerge --sync "$@" ||
+		return 0
+
+	message "rollback to websync..."
+	emerge-webrsync "$@"
+
+	local f reponame
+
+	for f in $(set +f && echo /etc/portage/repos.conf /etc/portage/repos.conf/*); do
+		[ ! -f "$f" ] ||
+			sed -nr -e 's/^[[:space:]]*\[([^]]+)\].*/\1/p' "$f"
+	done |
+	while read -r reponame; do
+		message "sync repo '$reponame'..."
+		emerge --sync "$@" "$reponame"
+	done
+}
+
 setup_distfiles()
 {
 	export DISTDIR=/.host/cache/distfiles
