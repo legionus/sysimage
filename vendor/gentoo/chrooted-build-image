@@ -15,9 +15,9 @@ set -- ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n --read-news=n --newuse --verbose-co
 [ -z "${IMAGE_VAR_CACHE_BINPKGS-}"       ] || set -- "$@" --usepkg=y --buildpkg=y --binpkg-respect-use=y --rebuilt-binaries=y
 
 setup_logs
+setup_package_db ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
 setup_distfiles
 setup_binpkgs
-setup_package_db ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
 
 cat_file /etc/portage/sets/sysimage < /.host/packages
 
