@@ -62,6 +62,7 @@ create_helper()
 		export LANGUAGE=C
 		export PROG="${0##*/}"
 		export verbose="$verbose"
+		export PATH="/.host/bin:$PATH"
 
 		EOF
 		cat <<-EOF
@@ -111,4 +112,17 @@ create_helper()
 create_vendor_helper()
 {
 	create_helper "$1" "$VENDORDIR/$VENDOR/chrooted-$1"
+}
+
+copy_verndor_tools()
+{
+	[ -d "$VENDORDIR/$VENDOR/chrooted" ] ||
+		return 0
+
+	verbose "coping vendor-specific tools ..."
+
+	mkdir $verbose -p -- "$HOSTDIR/bin"
+
+	find "$VENDORDIR/$VENDOR/chrooted" -mindepth 1 -maxdepth 1 \
+		-exec cp $verbose -at "$HOSTDIR/bin" -- '{}' '+'
 }

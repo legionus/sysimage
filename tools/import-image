@@ -18,6 +18,8 @@ fi
 ! podman image exists "$IMAGE_SYSIMAGE:$tag" ||
 	exit 0
 
+copy_verndor_tools
+
 create_vendor_helper "$PROG"
 set --
 

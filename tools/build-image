@@ -23,6 +23,8 @@ for n in $IMAGE_PACKAGES; do
 	fi
 done > "$HOSTDIR"/packages
 
+copy_verndor_tools
+
 create_vendor_helper "$PROG"
 
 podman image build --squash --force-rm "${podman_common_volumes[@]}" \

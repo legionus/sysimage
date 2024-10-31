@@ -10,6 +10,8 @@ IMAGE="${IMAGE:?IMAGE required}"
 podman image exists "$IMAGE" ||
 	fatal "image not found: $IMAGE"
 
+copy_verndor_tools
+
 create_vendor_helper "$PROG"
 
 podman container run "${podman_common_volumes[@]}" --rm -ti \

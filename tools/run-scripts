@@ -18,6 +18,8 @@ fi
 podman image exists "$IMAGE_SYSIMAGE:$latest" ||
 	fatal "image \`$IMAGE_SYSIMAGE:$latest' not found"
 
+copy_verndor_tools
+
 mkdir -p -- "$HOSTDIR"/scripts.d
 {
 	printf 'FROM %s\n' "$IMAGE_SYSIMAGE:$latest"
