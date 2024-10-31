@@ -106,6 +106,7 @@ printf >> "$ROOT"/etc/portage/make.conf '%s ### by sysimage\n' \
 
 USE=build \
 	run_with_message "Create new filesystem layout" \
+	timestamp-cmd \
 	emerge --update --emptytree --nodeps sys-apps/baselayout
 
 message "Create set of packages"
@@ -152,6 +153,7 @@ virtual/pkgconfig
 EOF
 
 run_with_message "Install minimal set of packages" \
+timestamp-cmd \
 emerge \
 	${IMAGE_VAR_EMERGE_JOBS:+--jobs "$IMAGE_VAR_EMERGE_JOBS"} \
 	${IMAGE_VAR_EMERGE_LOAD_AVERAGE:+--load-average "$IMAGE_VAR_EMERGE_LOAD_AVERAGE"} \

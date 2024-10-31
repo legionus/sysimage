@@ -35,9 +35,11 @@ fi
 	export SKIP_KERNEL_CHECK=1
 
 run_with_message "installation extra packages ..." \
+timestamp-cmd \
 emerge "$@" --deep --with-bdeps=y @sysimage
 
 run_with_message "update the @world ..." \
+timestamp-cmd \
 emerge "$@" ${IMAGE_VAR_EMERGE_QUIET:+-q} --update --newuse --deep --with-bdeps=y @world
 
 if [ -z "${IMAGE_VAR_SKIP_KERNEL:-}" ]; then
@@ -55,6 +57,7 @@ if [ -z "${IMAGE_VAR_SKIP_KERNEL:-}" ]; then
 			ln -vnsf -- "$value" /usr/src/linux
 
 			run_with_message "need to rebuild kernel modules for $value ..." \
+			timestamp-cmd \
 			emerge ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n "${automask[@]}" @module-rebuild
 		done
 
@@ -65,6 +68,7 @@ fi
 
 [ -z "${IMAGE_VAR_REMOVE_BDEPS:-}" ] ||
 	run_with_message "remove build deps..." \
+	timestamp-cmd \
 	emerge --depclean --with-bdeps=n
 
 remove_binpkgs_conf

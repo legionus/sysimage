@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+import sys
+import subprocess
+import select
+from datetime import datetime
+
+
+def main() -> int:
+    if len(sys.argv) == 1:
+        return 0
+
+    process = subprocess.Popen(sys.argv[1:],
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE,
+                               text=True)
+
+    while True:
+        reads = [stream for stream in [process.stdout, process.stderr] if stream and not stream.closed]
+
+        if not reads:
+            break
+
+        readable, _, _ = select.select(reads, [], [], 0.1)
+
+        for stream in readable:
+            line = stream.readline()
+
+            if line:
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                stream_name = "stdout" if stream == process.stdout else "stderr"
+
+                print(f"{timestamp}: {stream_name}: {line.strip()}", flush=True)
+
+            elif process.poll() is not None:
+                stream.close()
+
+    return process.returncode
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        pass
+    sys.exit(0)
