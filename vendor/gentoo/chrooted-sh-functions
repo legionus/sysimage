@@ -30,6 +30,22 @@ setup_logs()
 
 setup_package_db()
 {
+	if [ -n "${IMAGE_VAR_CACHE_REPOS:-}" ]; then
+		mkdir -p -- /.host/cache/repos
+
+		local need_update=""
+
+		if [ ! -L /var/db/repos ] && [ -d /var/db/repos ]; then
+			rm -rf -- /var/db/repos
+			ln -s -- /.host/cache/repos /var/db/repos
+
+			 need_update=1
+		fi
+
+		[ -n "$need_update" ] ||
+			return 0
+	fi
+
 	message "sync gentoo repos..."
 
 	! emerge --sync "$@" ||
