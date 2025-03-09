@@ -15,6 +15,14 @@ if podman image exists "$IMAGE_SYSIMAGE:$tag"; then
 	exit 0
 fi
 
+for n in ${IMAGE_ORDERED_PACKAGES-}; do
+	if [ -f "$n" ]; then
+		grep -v -e '^#' "$n" ||:
+	else
+		printf '%s\n' "$n"
+	fi
+done > "$HOSTDIR"/packages.ordered
+
 for n in $IMAGE_PACKAGES; do
 	if [ -f "$n" ]; then
 		grep -v -e '^#' "$n" ||:

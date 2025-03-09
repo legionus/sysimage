@@ -19,6 +19,20 @@ setup_package_db ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
 setup_distfiles
 setup_binpkgs
 
+if [ -s /.host/packages.ordered ]; then
+	message "install packages one by one ..."
+
+	while read -r pkg; do
+		{
+			run_with_message "installing package $pkg ..." \
+			timestamp-cmd \
+			emerge "$@" "$pkg"
+		} < /dev/null
+	done < /.host/packages.ordered
+
+	message "installion ordered packages done"
+fi
+
 cat_file /etc/portage/sets/sysimage < /.host/packages
 
 if grep -E -qs \
