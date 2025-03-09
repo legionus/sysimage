@@ -117,6 +117,13 @@ USE=build \
 message "Create set of packages"
 cat_file "$ROOT"/etc/portage/sets/sysimage <<EOF
 app-admin/eselect
+app-alternatives/awk
+app-alternatives/bzip2
+app-alternatives/gzip
+app-alternatives/lex
+app-alternatives/sh
+app-alternatives/tar
+app-alternatives/yacc
 app-arch/bzip2
 app-arch/gzip
 app-arch/tar
