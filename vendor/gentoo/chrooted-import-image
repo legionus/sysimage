@@ -79,6 +79,11 @@ fi
 
 ln -vsf -- "$ROOT"/etc/portage /etc/portage
 
+mkdir -p -- "$ROOT"/proc
+for n in cpuinfo filesystems meminfo mounts; do
+	cat_file "$ROOT"/proc/"$n" < /proc/"$n"
+done
+
 message "Change profile"
 profile="${IMAGE_VAR_PROFILE:-}"
 
@@ -164,6 +169,9 @@ emerge \
 message "Cleanup"
 sed -i -e '/ ### by sysimage$/d' \
 	"$ROOT"/etc/portage/make.conf
+
+[ ! -d "$ROOT"/proc ] ||
+	find "$ROOT"/proc -mindepth 1 -delete ||:
 
 cleanup_portage "$ROOT"
 
