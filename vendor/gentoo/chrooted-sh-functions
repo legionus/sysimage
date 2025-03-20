@@ -46,6 +46,9 @@ setup_package_db()
 			return 0
 	fi
 
+	[ -z "${IMAGE_VAR_DONT_UPDATE_REPOS:-}" ] ||
+		return 0
+
 	message "sync gentoo repos..."
 
 	! emerge --sync "$@" ||
