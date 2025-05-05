@@ -5,6 +5,10 @@
 set -eu
 
 cd /
+mkdir -p -- /var/db/repos/gentoo
+
+run_with_message "Sync vendor repositories" \
+emerge-webrsync -q
 
 setup_logs
 setup_distfiles
@@ -56,15 +60,15 @@ if [ -d "$ROOT"/etc/portage/repos.conf ]; then
 	rm -vrf -- "$ROOT"/etc/portage/repos.conf
 fi
 
+mkdir -p -- "$ROOT"/var/db/repos
+
 message "Move repos into the new image"
+setup_package_db ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
+
 [ ! -d /var/db/repos ] ||
 	rm -rf -- /var/db/repos
 
-mkdir -p -- "$ROOT"/var/db/repos/gentoo
 ln -vsf  -- "$ROOT"/var/db/repos /var/db/repos
-
-message "Sync time!"
-emerge-webrsync -q
 
 message "Prepare new portage"
 mkdir -p -- "$ROOT"/etc/portage
@@ -74,8 +78,21 @@ if [ -d /etc/portage ]; then
 	cp -P -- /etc/portage.stage3/make.profile "$ROOT"/etc/portage/
 fi
 
+link_profile()
+{
+	local profiles="/var/db/repos/gentoo/profiles"
+
+	[ -d "${ROOT}$profiles" ] ||
+		fatal "Error: Directory does not exist: ${ROOT}$profiles"
+
+	[ -d "${ROOT}$profiles/$1" ] ||
+		fatal "Error: profile does not exist: $1"
+
+	ln -vnsf -- "../..$profiles/$1" "$ROOT"/etc/portage/make.profile
+}
+
 [ -L "$ROOT"/etc/portage/make.profile ] ||
-	ln -vs ../../var/db/repos/gentoo/profiles/default/linux "$ROOT"/etc/portage/make.profile
+	link_profile default/linux
 
 ln -vsf -- "$ROOT"/etc/portage /etc/portage
 
@@ -88,22 +105,25 @@ message "Change profile"
 profile="${IMAGE_VAR_PROFILE:-}"
 
 if [ -z "$profile" ]; then
-	profile_pattern="default/linux/${IMAGE_VAR_ARCH:-amd64}/[0-9][^/]+${IMAGE_VAR_VARIANT:+/$IMAGE_VAR_VARIANT}"
+	profiles="$ROOT"/var/db/repos/gentoo/profiles
+	arch="${IMAGE_VAR_ARCH:-amd64}"
+
+	grep -qsxF "$arch" "$profiles"/arch.list ||
+		fatal "Error: IMAGE_VAR_ARCH not found: ${IMAGE_VAR_ARCH:-amd64}"
+
+	profile_pattern="default/linux/$arch/[0-9][^/]+${IMAGE_VAR_VARIANT:+/$IMAGE_VAR_VARIANT}"
 
 	profile="$(
-		eselect profile list |
-			sed -r -e 's,[[:space:]]+\[[0-9]+\][[:space:]]+([^[:space:]]+) \(.*,\1,g' |
+		sed -nr -e 's|^'"$arch"'[[:space:]]+([^[:space:]]+)[[:space:]]+.*$|\1|p' "$profiles"/profiles.desc |
 			grep -xE "$profile_pattern" |
 			sort --version-sort |
 			tail -1
 	)"
-
-	if [ "$(printf '%s\n' "$profile" | wc -l)" != 1 ]; then
+	[ -n "$profile" ] ||
 		fatal "Error: profile not found: $profile_pattern"
-	fi
 fi
 
-eselect profile set "$profile"
+link_profile "$profile"
 
 message "Enforce temporary settings"
 printf >> "$ROOT"/etc/portage/make.conf '%s ### by sysimage\n' \
@@ -177,8 +197,15 @@ message "Cleanup"
 sed -i -e '/ ### by sysimage$/d' \
 	"$ROOT"/etc/portage/make.conf
 
-[ ! -d "$ROOT"/proc ] ||
-	find "$ROOT"/proc -mindepth 1 -delete ||:
+for n in proc sys run; do
+	[ ! -d "$ROOT/$n" ] ||
+		find "$ROOT/$n" -mindepth 1 -delete ||:
+done
+
+if [ -L "$ROOT"/var/db/repo ]; then
+	rm -f -- "$ROOT"/var/db/repo
+	mkdir -- "$ROOT"/var/db/repo
+fi
 
 cleanup_portage "$ROOT"
 

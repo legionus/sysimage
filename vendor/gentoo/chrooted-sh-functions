@@ -35,9 +35,9 @@ setup_package_db()
 
 		local need_update=""
 
-		if [ ! -L /var/db/repos ] && [ -d /var/db/repos ]; then
-			rm -rf -- /var/db/repos
-			ln -s -- /.host/cache/repos /var/db/repos
+		if [ ! -L "${ROOT:-}"/var/db/repos ] && [ -d "${ROOT:-}"/var/db/repos ]; then
+			rm -rf -- "${ROOT:-}"/var/db/repos
+			ln -s -- /.host/cache/repos "${ROOT:-}"/var/db/repos
 
 			 need_update=1
 		fi
