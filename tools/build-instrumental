@@ -13,8 +13,11 @@ set --
 [ -z "${INSTRUMENTAL_FILES-}" ] ||
 	set -- "$@" -v "$INSTRUMENTAL_FILES:/.host/files:z"
 
+nproc="$(grep -c ^processor /proc/cpuinfo 2>/dev/null || echo 1)"
+
 podman image build --squash --force-rm "${podman_common_volumes[@]}" "$@" \
 	--build-arg verbose="$verbose" \
+	--build-arg jobs="$nproc" \
 	--build-arg extra="${INSTRUMENTAL_PACKAGES-}" \
 	--build-arg extra2="${INSTRUMENTAL_PACKAGES2-}" \
 	-t "$IMAGE_INSTRUMENTAL:latest" \

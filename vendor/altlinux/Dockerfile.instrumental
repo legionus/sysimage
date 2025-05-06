@@ -7,6 +7,7 @@ FROM alt:sisyphus
 ARG extra=
 ARG extra2=
 ARG verbose=
+ARG jobs=
 
 RUN \
 mkdir -p -- /.host/cache/apt/partial

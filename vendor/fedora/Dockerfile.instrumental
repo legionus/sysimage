@@ -6,6 +6,7 @@ FROM fedora
 ARG extra=
 ARG extra2=
 ARG verbose=
+ARG jobs=
 
 RUN test -n "$extra" && \
 dnf -y install $extra ||:
