@@ -6,13 +6,17 @@ set -eu
 
 export FEATURES="-ipc-sandbox -network-sandbox -pid-sandbox ${IMAGE_VAR_EMERGE_IGNORE_COLLISIONS:+-collision-detect -protect-owned}"
 
-automask=( --autounmask=y --autounmask-write=y --autounmask-use=y --autounmask-continue=y )
+emerge_common=( ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n --verbose-conflicts )
+emerge_automask=( --autounmask=y --autounmask-write=y --autounmask-use=y --autounmask-continue=y )
+emerge_changed_use=( --newuse --changed-use --changed-slot --changed-deps )
+emerge_binpkgs=( --usepkg=y --buildpkg=y --binpkg-respect-use=y --rebuilt-binaries=y )
+emerge_parallel=(
+	${IMAGE_VAR_EMERGE_JOBS:+--jobs="$IMAGE_VAR_EMERGE_JOBS"}
+	${IMAGE_VAR_EMERGE_LOAD_AVERAGE:+--load-average="$IMAGE_VAR_EMERGE_LOAD_AVERAGE"}
+)
 
-set -- ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n --read-news=n --newuse --verbose-conflicts "${automask[@]}"
-
-[ -z "${IMAGE_VAR_EMERGE_JOBS-}"         ] || set -- "$@" --jobs "$IMAGE_VAR_EMERGE_JOBS"
-[ -z "${IMAGE_VAR_EMERGE_LOAD_AVERAGE-}" ] || set -- "$@" --load-average "$IMAGE_VAR_EMERGE_LOAD_AVERAGE"
-[ -z "${IMAGE_VAR_CACHE_BINPKGS-}"       ] || set -- "$@" --usepkg=y --buildpkg=y --binpkg-respect-use=y --rebuilt-binaries=y
+set -- "${emerge_common[@]}" "${emerge_automask[@]}" "${emrege_changed_use[@]}" "${emerge_parallel[@]}"
+[ -z "${IMAGE_VAR_CACHE_BINPKGS-}" ] || set -- "$@" "${emerge_binpkgs[@]}"
 
 setup_logs
 setup_package_db ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
@@ -54,7 +58,7 @@ emerge "$@" --deep --with-bdeps=y @sysimage
 
 run_with_message "update the @world ..." \
 timestamp-cmd \
-emerge "$@" ${IMAGE_VAR_EMERGE_QUIET:+-q} --update --newuse --deep --with-bdeps=y @world
+emerge "$@" ${IMAGE_VAR_EMERGE_QUIET:+-q} --update --deep --with-bdeps=y @world
 
 if [ -z "${IMAGE_VAR_SKIP_KERNEL:-}" ]; then
 	kernels=(`find /usr/src -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -V`)
@@ -72,7 +76,7 @@ if [ -z "${IMAGE_VAR_SKIP_KERNEL:-}" ]; then
 
 			run_with_message "need to rebuild kernel modules for $value ..." \
 			timestamp-cmd \
-			emerge ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n "${automask[@]}" @module-rebuild
+			emerge "${emerge_common[@]}" "${emerge_automask[@]}" @module-rebuild
 		done
 
 		[ -z "$current" ] ||

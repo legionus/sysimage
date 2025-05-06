@@ -191,6 +191,7 @@ emerge \
 	${IMAGE_VAR_EMERGE_LOAD_AVERAGE:+--load-average "$IMAGE_VAR_EMERGE_LOAD_AVERAGE"} \
 	${IMAGE_VAR_CACHE_BINPKGS:+--usepkg=y} \
 	--quiet --update --emptytree --with-bdeps=y \
+	--newuse --changed-use --changed-slot --changed-deps \
 	@sysimage
 
 message "Cleanup"
