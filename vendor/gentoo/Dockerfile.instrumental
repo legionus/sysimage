@@ -23,7 +23,11 @@ RUN test -z "$extra2" || \
 emerge $verbose --jobs=$jobs --verbose-conflicts --ask=n $extra2
 
 RUN test -z "$extra$extra2" || \
-find /var/db/repos /var/cache/edb \
-  -mindepth 1 -maxdepth 1 -exec rm -rf -- '{}' '+'
+find \
+  /var/cache/distfiles \
+  /var/cache/edb \
+  /var/db/repos \
+  /var/tmp/portage \
+  -mindepth 1 -delete
 
 # vim: ft=dockerfile
