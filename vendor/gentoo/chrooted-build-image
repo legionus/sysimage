@@ -20,7 +20,6 @@ set -- "${emerge_common[@]}" "${emerge_automask[@]}" "${emrege_changed_use[@]}" 
 
 setup_logs
 setup_package_db ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
-setup_distfiles
 setup_binpkgs
 
 if [ -s /.host/packages.ordered ]; then

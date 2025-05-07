@@ -11,3 +11,13 @@ IMAGE_VAR_EMERGE_IGNORE_COLLISIONS ?=
 IMAGE_VAR_SKIP_KERNEL ?=
 
 BASEIMAGE_SCRIPT = $(VENDORDIR)/$(VENDOR)/baseimage.sh
+
+ifneq ($(IMAGE_VAR_CACHE_REPOS),)
+  EXTRA_VOLUMES += -v $(CACHEDIR)/$(VENDOR)/repos:/var/db/repos:z
+  EXTRA_VOLUMES += -v $(CACHEDIR)/$(VENDOR)/edb:/var/cache/edb:z
+  EXTRA_VOLUMES += -v $(CACHEDIR)/$(VENDOR)/distfiles:/var/cache/distfiles:z
+endif
+
+ifneq ($(IMAGE_VAR_CACHE_BINPKGS),)
+  EXTRA_VOLUMES += -v $(CACHEDIR)/$(VENDOR)/binpkgs:/var/cache/binpkgs:z
+endif

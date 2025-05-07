@@ -32,6 +32,14 @@ ifeq "$(VENDOR)" ""
   $(info variable VENDOR required)
 endif
 
+BASE_VOLUMES = \
+	-v $(HOSTDIR):/.host:z \
+	-v $(CACHEDIR)/$(VENDOR):/.host/cache:z
+
+EXTRA_VOLUMES =
+
+VOLUMES = $(BASE_VOLUMES) $(EXTRA_VOLUMES)
+
 include $(VENDORDIR)/$(VENDOR)/vendor.mk
 
 # build-instrumental

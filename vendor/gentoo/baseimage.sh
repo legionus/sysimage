@@ -17,7 +17,6 @@ set -- "${emerge_common[@]}" "${emerge_automask[@]}" "${emrege_changed_use[@]}" 
 [ -z "${IMAGE_VAR_CACHE_BINPKGS-}" ] || set -- "$@" "${emerge_binpkgs[@]}"
 
 seup_logs
-setup_distfiles
 setup_binpkgs
 
 emerge-webrsync -q

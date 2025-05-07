@@ -4,11 +4,6 @@
 
 PROG="${0##*/}"
 
-podman_common_volumes=(
-	-v "$HOSTDIR":/.host:z
-	-v "$CACHEDIR/$VENDOR":/.host/cache:z
-)
-
 message()
 {
 	printf >&2 '%s: %s\n' "$PROG" "$*"

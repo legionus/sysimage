@@ -9,15 +9,12 @@ export FEATURES="-ipc-sandbox -network-sandbox -pid-sandbox ${IMAGE_VAR_EMERGE_I
 if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 	message "using binpkg cache ..."
 
-	export PKGDIR=/.host/cache/binpkgs
-
-	mkdir -p -- "$PKGDIR"
-	:>> "$PKGDIR"/Packages
+	:>> /var/cache/binpkgs/Packages
 
 	mkdir -p -- /etc/portage/binrepos.conf
 	cat > /etc/portage/binrepos.conf/gentoobinhost.conf <<-EOF
 	[sysimage]
-	sync-uri=file://$PKGDIR
+	sync-uri=file:///var/cache/binpkgs
 	fetchcommand=/usr/bin/curl --fail --output \${DISTDIR}/\${FILE} \${URI}
 	resumecommand=/usr/bin/curl -fail --continue-at - --output \${DISTDIR}/\${FILE} \${URI}
 	EOF
@@ -29,8 +26,5 @@ if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 	# deleted, then it must be recreated.
 	emaint binhost --fix
 fi
-
-export DISTDIR=/.host/cache/distfiles
-mkdir -p -- "$DISTDIR"
 
 exec bash

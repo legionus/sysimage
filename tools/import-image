@@ -29,7 +29,7 @@ if [ -n "${IMAGE_PREFILES-}" ]; then
 	set -- -v "$IMAGE_PREFILES":/.host/prefiles:z
 fi
 
-podman container run "${podman_common_volumes[@]}" "$@" \
+podman container run $BASE_VOLUMES "$@" \
 	"$IMAGE_INSTRUMENTAL" "/.host/$PROG.chrooted"
 
 podman image import "$HOSTDIR/image.tar" "$IMAGE_SYSIMAGE:$tag"

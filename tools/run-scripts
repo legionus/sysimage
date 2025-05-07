@@ -51,8 +51,7 @@ mkdir -p -- "$HOSTDIR"/scripts.d
 		printf 'RUN "/.host/scripts.d/%s"\n' "${f##*/}"
 	done
 } |
-	podman image build --squash --force-rm --dns=none \
-		"${podman_common_volumes[@]}" \
+	podman image build --squash --force-rm --dns=none $VOLUMES \
 		-t "$IMAGE_SYSIMAGE:$tag" -f-
 
 podman image tag "$IMAGE_SYSIMAGE:$tag" "$IMAGE_SYSIMAGE:$latest"

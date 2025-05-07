@@ -11,7 +11,6 @@ run_with_message "Sync vendor repositories" \
 emerge-webrsync -q
 
 setup_logs
-setup_distfiles
 setup_binpkgs
 
 export ROOT=/image
@@ -60,15 +59,17 @@ if [ -d "$ROOT"/etc/portage/repos.conf ]; then
 	rm -vrf -- "$ROOT"/etc/portage/repos.conf
 fi
 
-mkdir -p -- "$ROOT"/var/db/repos
+mkdir -p -- \
+	"$ROOT"/var/cache/binpkgs \
+	"$ROOT"/var/cache/distfiles \
+	"$ROOT"/var/cache/edb \
+	"$ROOT"/var/db/repos
 
 message "Move repos into the new image"
 setup_package_db ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
 
-[ ! -d /var/db/repos ] ||
-	rm -rf -- /var/db/repos
-
-ln -vsf  -- "$ROOT"/var/db/repos /var/db/repos
+find /var/db/repos -mindepth 1 -maxdepth 1 \
+	-exec cp -rt "$ROOT"/var/db/repos '{}' '+'
 
 message "Prepare new portage"
 mkdir -p -- "$ROOT"/etc/portage
@@ -198,15 +199,7 @@ message "Cleanup"
 sed -i -e '/ ### by sysimage$/d' \
 	"$ROOT"/etc/portage/make.conf
 
-for n in proc sys run; do
-	[ ! -d "$ROOT/$n" ] ||
-		find "$ROOT/$n" -mindepth 1 -delete ||:
-done
-
-if [ -L "$ROOT"/var/db/repo ]; then
-	rm -f -- "$ROOT"/var/db/repo
-	mkdir -- "$ROOT"/var/db/repo
-fi
+find "$ROOT"/proc "$ROOT"/run "$ROOT"/sys -mindepth 1 -delete ||:
 
 cleanup_portage "$ROOT"
 
@@ -215,3 +208,6 @@ tar -cf /.host/image.tar \
 	--preserve-permissions --xattrs --xattrs-include='*.*' \
 	--numeric-owner \
 	--directory "$ROOT" .
+
+remove_binpkgs_conf
+cleanup_portage /

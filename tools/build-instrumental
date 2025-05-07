@@ -15,7 +15,7 @@ set --
 
 nproc="$(grep -c ^processor /proc/cpuinfo 2>/dev/null || echo 1)"
 
-podman image build --squash --force-rm "${podman_common_volumes[@]}" "$@" \
+podman image build --squash --force-rm "$@" \
 	--build-arg verbose="$verbose" \
 	--build-arg jobs="$nproc" \
 	--build-arg extra="${INSTRUMENTAL_PACKAGES-}" \

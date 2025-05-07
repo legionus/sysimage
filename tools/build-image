@@ -35,7 +35,7 @@ copy_verndor_tools
 
 create_vendor_helper "$PROG"
 
-podman image build --squash --force-rm "${podman_common_volumes[@]}" \
+podman image build --squash --force-rm $VOLUMES \
 	-t "$IMAGE_SYSIMAGE:$tag" -f- "$CURDIR" <<-EOF
 FROM $IMAGE_SYSIMAGE:$latest
 RUN /.host/$PROG.chrooted

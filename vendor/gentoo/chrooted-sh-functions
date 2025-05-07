@@ -30,22 +30,6 @@ setup_logs()
 
 setup_package_db()
 {
-	if [ -n "${IMAGE_VAR_CACHE_REPOS:-}" ]; then
-		mkdir -p -- /.host/cache/repos
-
-		local need_update=""
-
-		if [ ! -L "${ROOT:-}"/var/db/repos ] && [ -d "${ROOT:-}"/var/db/repos ]; then
-			rm -rf -- "${ROOT:-}"/var/db/repos
-			ln -s -- /.host/cache/repos "${ROOT:-}"/var/db/repos
-
-			 need_update=1
-		fi
-
-		[ -n "$need_update" ] ||
-			return 0
-	fi
-
 	[ -z "${IMAGE_VAR_DONT_UPDATE_REPOS:-}" ] ||
 		return 0
 
@@ -69,29 +53,21 @@ setup_package_db()
 	done
 }
 
-setup_distfiles()
-{
-	export DISTDIR=/.host/cache/distfiles
-	mkdir -p -- "$DISTDIR"
-}
-
 setup_binpkgs()
 {
 	[ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ] ||
 		return 0
 
 	message "using binpkg cache ..."
-	export PKGDIR=/.host/cache/binpkgs
 
-	mkdir -p -- "$PKGDIR"
-	:>> "$PKGDIR"/Packages
+	:>> /var/cache/binpkgs/Packages
 
 	# Drop all previous binpkgs sources
 	rm -rf -- /etc/portage/binrepos.conf
 
 	cat_file /etc/portage/binrepos.conf/sysimage.conf <<-EOF
 	[sysimage]
-	sync-uri=file://$PKGDIR
+	sync-uri=file:///var/cache/binpkgs
 	fetchcommand=/usr/bin/curl --fail --output \${DISTDIR}/\${FILE} \${URI}
 	resumecommand=/usr/bin/curl -fail --continue-at - --output \${DISTDIR}/\${FILE} \${URI}
 	EOF
@@ -114,8 +90,15 @@ remove_binpkgs_conf()
 #
 cleanup_portage()
 {
-	local rootdir="$1"
+	local d
 
-	[ ! -d "$rootdir"/var/tmp/portage ] ||
-		find "$rootdir"/var/tmp/portage -mindepth 1 -delete ||:
+	for d in \
+		"$1"/var/cache/distfiles \
+		"$1"/var/cache/edb \
+		"$1"/var/db/repos \
+		"$1"/var/tmp/portage \
+	; do
+		mountpoint -q "$d" ||
+			find "$d" -mindepth 1 -delete ||:
+	done
 }

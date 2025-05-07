@@ -14,7 +14,7 @@ copy_verndor_tools
 
 create_vendor_helper "$PROG"
 
-podman container run "${podman_common_volumes[@]}" --rm -ti \
+podman container run $VOLUMES --rm -ti \
 	"$IMAGE" "/.host/$PROG.chrooted"
 
 find "$HOSTDIR" -mindepth 1 -maxdepth 1 -exec rm -rf -- '{}' '+'

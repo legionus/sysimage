@@ -25,7 +25,7 @@ tree="$(readlink -ev "$COPY_TREE")"
 workdir="${tree%/*}"
 subdir="${tree##*/}"
 
-podman image build --squash --force-rm "${podman_common_volumes[@]}" \
+podman image build --squash --force-rm $VOLUMES \
         -t "$IMAGE_SYSIMAGE:$tag" \
         -f - "$workdir" <<-EOF
 FROM $IMAGE_SYSIMAGE:$latest
