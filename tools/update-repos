@@ -1,0 +1,20 @@
+#!/bin/bash -efu
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2025  Alexey Gladkov <gladkov.alexey@gmail.com>
+
+. "$HOMEDIR"/env
+. "$TOOLSDIR"/sh-functions
+
+latest="${SYSIMAGE_TAG_PREFIX:+$SYSIMAGE_TAG_PREFIX-}latest"
+
+podman image exists "$IMAGE_SYSIMAGE:$latest" ||
+	fatal "image not found: $IMAGE_SYSIMAGE:$latest"
+
+copy_verndor_tools
+
+create_vendor_helper "$PROG"
+
+podman container run $VOLUMES --rm -ti \
+	"$IMAGE_SYSIMAGE:$latest" "/.host/$PROG.chrooted"
+
+find "$HOSTDIR" -mindepth 1 -maxdepth 1 -exec rm -rf -- '{}' '+'

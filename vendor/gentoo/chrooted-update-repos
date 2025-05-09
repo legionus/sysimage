@@ -1,0 +1,25 @@
+#!/bin/bash
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2025  Alexey Gladkov <gladkov.alexey@gmail.com>
+
+set -eu
+
+export FEATURES="-news -ipc-sandbox -network-sandbox -pid-sandbox"
+
+set --
+[ -z "${IMAGE_VAR_EMERGE_JOBS-}"         ] || set -- "$@" --jobs "$IMAGE_VAR_EMERGE_JOBS"
+[ -z "${IMAGE_VAR_EMERGE_LOAD_AVERAGE-}" ] || set -- "$@" --load-average "$IMAGE_VAR_EMERGE_LOAD_AVERAGE"
+
+run_with_message "sync all repositories ..." \
+emerge --sync "$@"
+
+run_with_message "check and update the dependency cache of all ebuilds in the repository ..." \
+emerge --regen "$@" ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
+
+run_with_message "clean distfiles ..." \
+eclean-dist ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
+
+run_with_message "clean binpkgs ..." \
+eclean-pkg ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
+
+#exec bash
