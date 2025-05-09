@@ -18,7 +18,6 @@ emerge_parallel=(
 set -- "${emerge_common[@]}" "${emerge_automask[@]}" "${emrege_changed_use[@]}" "${emerge_parallel[@]}"
 [ -z "${IMAGE_VAR_CACHE_BINPKGS-}" ] || set -- "$@" "${emerge_binpkgs[@]}"
 
-setup_logs
 setup_package_db ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
 setup_binpkgs
 

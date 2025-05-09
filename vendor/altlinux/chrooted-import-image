@@ -34,11 +34,14 @@ echo '%_rpmscript_werror 1' >>./etc/rpm/macros
 
 socat -u UNIX-RECV:/image/dev/log,ignoreeof GOPEN:/dev/null &
 
-apt-get -y update
+apt_args=
+if [ -n "${IMAGE_VAR_CACHE_REPOS-}" ]; then
+	mkdir -p -- /.host/cache/apt/partial
+	apt_args="-o Dir::Cache::archives=/.host/cache/apt"
+fi
 
-mkdir -p -- /.host/cache/apt/partial
-apt-get -y \
-	-o Dir::Cache::archives=/.host/cache/apt \
+apt-get -y update
+apt-get -y $apt_args \
 	-o RPM::RootDir=/image \
 	install $IMAGE_VAR_INIT_PACKAGES
 

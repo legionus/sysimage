@@ -9,18 +9,18 @@ ARG extra2=
 ARG verbose=
 ARG jobs=
 
-RUN \
-mkdir -p -- /.host/cache/apt/partial
-
-RUN \
+RUN && \
 apt-get -y -qq update && \
-apt-get -y -qq -o Dir::Cache::archives=/.host/cache/apt install apt socat $extra ||:
+apt-get -y -qq install apt socat $extra ||:
 
 RUN test -d /.host/files && \
 find /.host/files/ -mindepth 1 -maxdepth 1 -exec cp $verbose -arft / -- '{}' '+' ||:
 
 RUN test -n "$extra2" && \
 apt-get -y -qq update && \
-apt-get -y -qq -o Dir::Cache::archives=/.host/cache/apt install $extra2 ||:
+apt-get -y -qq install $extra2 ||:
+
+RUN && \
+apt-get -y -qq clean
 
 # vim: ft=dockerfile

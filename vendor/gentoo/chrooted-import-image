@@ -10,7 +10,6 @@ mkdir -p -- /var/db/repos/gentoo
 run_with_message "Sync vendor repositories" \
 emerge-webrsync -q
 
-setup_logs
 setup_binpkgs
 
 export ROOT=/image
