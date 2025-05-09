@@ -128,7 +128,7 @@ link_profile "$profile"
 
 message "Enforce temporary settings"
 printf >> "$ROOT"/etc/portage/make.conf '%s ### by sysimage\n' \
-	"FEATURES=\"\${FEATURES} -ipc-sandbox -network-sandbox -pid-sandbox ${IMAGE_VAR_EMERGE_IGNORE_COLLISIONS:+-collision-detect -protect-owned}\""
+	"FEATURES=\"\${FEATURES} -news -ipc-sandbox -network-sandbox -pid-sandbox ${IMAGE_VAR_EMERGE_IGNORE_COLLISIONS:+-collision-detect -protect-owned}\""
 
 USE=build \
 	run_with_message "Create new filesystem layout" \

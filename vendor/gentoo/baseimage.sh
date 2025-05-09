@@ -2,7 +2,7 @@
 
 set -x
 
-export FEATURES="-ipc-sandbox -network-sandbox -pid-sandbox"
+export FEATURES="-news -ipc-sandbox -network-sandbox -pid-sandbox"
 
 emerge_common=( ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n --verbose-conflicts )
 emerge_automask=( --autounmask=y --autounmask-write=y --autounmask-use=y --autounmask-continue=y )

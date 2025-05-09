@@ -8,7 +8,7 @@ ARG extra2=
 ARG verbose=
 ARG jobs=
 
-ENV FEATURES="-ipc-sandbox -network-sandbox -pid-sandbox"
+ENV FEATURES="-news -ipc-sandbox -network-sandbox -pid-sandbox"
 
 RUN test -z "$extra$extra2" || \
 { mkdir -p /var/db/repos/gentoo; emerge-webrsync --quiet; }
