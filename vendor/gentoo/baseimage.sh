@@ -2,7 +2,9 @@
 
 set -x
 
-export FEATURES="-news -ipc-sandbox -network-sandbox -pid-sandbox"
+FEATURES="-news -ipc-sandbox -network-sandbox -pid-sandbox"
+FEATURES="$FEATURES parallel-fetch parallel-install -merge-wait -ebuild-locks"
+export FEATURES
 
 emerge_common=( ${IMAGE_VAR_EMERGE_QUIET:+-q} --ask=n --verbose-conflicts )
 emerge_automask=( --autounmask=y --autounmask-write=y --autounmask-use=y --autounmask-continue=y )

@@ -126,8 +126,13 @@ fi
 link_profile "$profile"
 
 message "Enforce temporary settings"
+
+_FEATURES="-news -ipc-sandbox -network-sandbox -pid-sandbox"
+_FEATURES="$_FEATURES parallel-fetch parallel-install -merge-wait -ebuild-locks"
+_FEATURES="$_FEATURES ${IMAGE_VAR_EMERGE_IGNORE_COLLISIONS:+-collision-detect -protect-owned}"
+
 printf >> "$ROOT"/etc/portage/make.conf '%s ### by sysimage\n' \
-	"FEATURES=\"\${FEATURES} -news -ipc-sandbox -network-sandbox -pid-sandbox ${IMAGE_VAR_EMERGE_IGNORE_COLLISIONS:+-collision-detect -protect-owned}\""
+	"FEATURES=\"\${FEATURES} ${_FEATURES}\""
 
 USE=build \
 	run_with_message "Create new filesystem layout" \

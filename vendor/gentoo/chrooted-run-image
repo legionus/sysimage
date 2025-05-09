@@ -4,7 +4,10 @@
 
 set -eu
 
-export FEATURES="-news -ipc-sandbox -network-sandbox -pid-sandbox ${IMAGE_VAR_EMERGE_IGNORE_COLLISIONS:+-collision-detect -protect-owned}"
+FEATURES="-news -ipc-sandbox -network-sandbox -pid-sandbox"
+FEATURES="$FEATURES parallel-fetch parallel-install -merge-wait -ebuild-locks"
+FEATURES="$FEATURES ${IMAGE_VAR_EMERGE_IGNORE_COLLISIONS:+-collision-detect -protect-owned}"
+export FEATURES
 
 if [ -n "${IMAGE_VAR_CACHE_BINPKGS:-}" ]; then
 	message "using binpkg cache ..."
