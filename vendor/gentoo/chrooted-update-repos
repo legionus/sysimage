@@ -10,8 +10,10 @@ set --
 [ -z "${IMAGE_VAR_EMERGE_JOBS-}"         ] || set -- "$@" --jobs "$IMAGE_VAR_EMERGE_JOBS"
 [ -z "${IMAGE_VAR_EMERGE_LOAD_AVERAGE-}" ] || set -- "$@" --load-average "$IMAGE_VAR_EMERGE_LOAD_AVERAGE"
 
-run_with_message "sync all repositories ..." \
-emerge --sync "$@"
+for name in `sed -r -n -e 's,^\[(.+)\],\1,p' /etc/portage/repos.conf/*`; do
+	run_with_message "sync '$name' repository ..." \
+	emerge --sync "$@" "$name"
+done
 
 run_with_message "check and update the dependency cache of all ebuilds in the repository ..." \
 emerge --regen "$@" ${IMAGE_VAR_EMERGE_QUIET:+--quiet}
